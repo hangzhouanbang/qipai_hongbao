@@ -1,0 +1,18 @@
+spring:
+  data:
+    mongodb:
+      uri: mongodb://localhost:27017/qipai_chaguan
+
+  application:
+    name: qipai-chaguan
+server:
+  port: 98
+  
+eureka:
+  client:
+    serviceUrl:
+      defaultZone: http://127.0.0.1:8761/eureka/
+
+filepath:
+  snapshotFileBasePath: /data/app/qipai_members/snapshot
+  jFileBasePath: /data/app/qipai_members/journal
