@@ -10,7 +10,7 @@ import com.dml.accounting.AccountingSummary;
  */
 public class MemberHongbaodianRecordDbo {
 	private String id;
-	private int accountingNo;// 流水号
+	private long accountingNo;// 流水号
 	private String accountId;// 账户id
 	private String memberId;// 玩家id
 	private int balanceAfter;// 余额
@@ -26,11 +26,11 @@ public class MemberHongbaodianRecordDbo {
 		this.id = id;
 	}
 
-	public int getAccountingNo() {
+	public long getAccountingNo() {
 		return accountingNo;
 	}
 
-	public void setAccountingNo(int accountingNo) {
+	public void setAccountingNo(long accountingNo) {
 		this.accountingNo = accountingNo;
 	}
 

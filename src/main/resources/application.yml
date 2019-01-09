@@ -1,10 +1,59 @@
 spring:
   data:
     mongodb:
-      uri: mongodb://localhost:27017/qipai_chaguan
+      uri: mongodb://localhost:27017/qipai_hongbao
 
+  cloud:
+    stream:
+      kafka:
+        binder:
+          brokers: localhost:9092
+          zk-nodes: localhost:2181
+          minPartitionCount: 1
+          autoCreateTopics: true
+          autoAddPartitions: false
+        bindings:
+          memberHongbaodianRecord:
+            producer:
+              configuration:
+                request:
+                  timeout:
+                    ms: 30000
+                linger:
+                  ms: 5
+                batch:
+                  size: 16384
+                  
+      bindings:
+        memberHongbaodianRecord:
+          destination: memberHongbaodianRecord
+          contentType: application/json
+          producer:
+            partitionCount: 1
+        memberLoginRecord:
+          destination: memberLoginRecord
+          group: qipai-hongbao
+          consumer:
+            concurrency: 1
+            partitioned: false
+          contentType: application/json
+        hongbao:
+          destination: hongbao
+          group: qipai-hongbao
+          consumer:
+            concurrency: 1
+            partitioned: false
+          contentType: application/json
+        hongbaodianaccounting:
+          destination: hongbaodianaccounting
+          group: qipai-hongbao
+          consumer:
+            concurrency: 1
+            partitioned: false
+          contentType: application/json
+            
   application:
-    name: qipai-chaguan
+    name: qipai-hongbao
 server:
   port: 98
   
@@ -14,5 +63,5 @@ eureka:
       defaultZone: http://127.0.0.1:8761/eureka/
 
 filepath:
-  snapshotFileBasePath: /data/app/qipai_members/snapshot
-  jFileBasePath: /data/app/qipai_members/journal
+  snapshotFileBasePath: /data/app/qipai_hongbao/snapshot
+  jFileBasePath: /data/app/qipai_hongbao/journal
