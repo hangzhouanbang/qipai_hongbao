@@ -15,4 +15,6 @@ public interface MemberDboDao {
 	void updateNickname(String memebrId, String nickname);
 
 	void updateHeadimgurl(String memberId, String headimgurl);
+
+	void updateMemberBaseInfo(String memberId, String nickname, String headimgurl, String gender);
 }

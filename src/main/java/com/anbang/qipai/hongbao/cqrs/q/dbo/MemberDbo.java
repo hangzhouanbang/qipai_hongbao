@@ -4,6 +4,7 @@ public class MemberDbo {
 	private String id;
 	private String nickname;
 	private String headimgurl;
+	private String gender;// 会员性别:男:male,女:female
 
 	public String getId() {
 		return id;
@@ -27,6 +28,14 @@ public class MemberDbo {
 
 	public void setHeadimgurl(String headimgurl) {
 		this.headimgurl = headimgurl;
+	}
+
+	public String getGender() {
+		return gender;
+	}
+
+	public void setGender(String gender) {
+		this.gender = gender;
 	}
 
 }

@@ -22,9 +22,12 @@ public class MemberMsgReceiver {
 	public void recordMembers(CommonMO mo) {
 		String msg = mo.getMsg();
 		String json = gson.toJson(mo.getData());
+		MemberDbo member = gson.fromJson(json, MemberDbo.class);
 		if ("newMember".equals(msg)) {
-			MemberDbo member = gson.fromJson(json, MemberDbo.class);
 			memberAuthQueryService.insertMember(member);
+		}
+		if ("update member info".equals(msg)) {
+			memberAuthQueryService.updateMemberBaseInfo(member);
 		}
 	}
 }

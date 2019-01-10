@@ -31,6 +31,11 @@ public class MemberAuthQueryService {
 		authorizationDboDao.save(authDbo);
 	}
 
+	public void updateMemberBaseInfo(MemberDbo member) {
+		memberDboDao.updateMemberBaseInfo(member.getId(), member.getNickname(), member.getHeadimgurl(),
+				member.getGender());
+	}
+
 	public void insertMember(MemberDbo member) {
 		memberDboDao.insert(member);
 	}

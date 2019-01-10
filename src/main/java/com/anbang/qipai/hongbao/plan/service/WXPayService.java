@@ -39,14 +39,6 @@ public class WXPayService {
 	private static int connectTimeout = 30000;// 传输超时时间，默认30秒
 	private RequestConfig requestConfig;// 请求器的配置
 	private CloseableHttpClient httpClient;// HTTP请求器
-	{
-		// 加载证书
-		try {
-			initCert();
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-	}
 
 	public Map<String, String> rewardAgent(HongbaodianOrder order) throws Exception {
 		String orderInfo = createRewardInfo(order);
@@ -58,6 +50,12 @@ public class WXPayService {
 
 	private SortedMap<String, String> reward(String orderInfo) throws Exception {
 		String result = null;
+		// 加载证书
+		try {
+			initCert();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 		HttpPost httpPost = new HttpPost("https://api.mch.weixin.qq.com/mmpaymkttransfers/promotion/transfers");
 		// 得指明使用UTF-8编码，否则到API服务器XML的中文不能被成功识别
 		StringEntity postEntity = new StringEntity(orderInfo, "UTF-8");
@@ -119,6 +117,12 @@ public class WXPayService {
 
 	private SortedMap<String, String> queryReward(String queryInfo) throws MalformedURLException, IOException {
 		String result = null;
+		// 加载证书
+		try {
+			initCert();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 		HttpPost httpPost = new HttpPost("https://api.mch.weixin.qq.com/mmpaymkttransfers/gettransferinfo");
 		// 得指明使用UTF-8编码，否则到API服务器XML的中文不能被成功识别
 		StringEntity postEntity = new StringEntity(queryInfo, "UTF-8");
