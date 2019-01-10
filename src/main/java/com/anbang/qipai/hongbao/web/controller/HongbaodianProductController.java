@@ -2,6 +2,8 @@ package com.anbang.qipai.hongbao.web.controller;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -11,7 +13,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.anbang.qipai.hongbao.cqrs.c.domain.hongbaodianorder.OrderHasAlreadyExistenceException;
-import com.anbang.qipai.hongbao.cqrs.c.domain.hongbaodianorder.OrderNotFoundException;
 import com.anbang.qipai.hongbao.cqrs.c.domain.member.MemberNotFoundException;
 import com.anbang.qipai.hongbao.cqrs.c.service.HongbaodianOrderCmdService;
 import com.anbang.qipai.hongbao.cqrs.c.service.MemberAuthService;
@@ -66,6 +67,8 @@ public class HongbaodianProductController {
 
 	@Autowired
 	private HongbaodianRecordMsgService hongbaodianRecordMsgService;
+
+	private ExecutorService executorService = Executors.newCachedThreadPool();
 
 	@RequestMapping("add_product")
 	public CommonVO addHongbaodianProduct(HongbaodianProduct product) {
@@ -135,18 +138,19 @@ public class HongbaodianProductController {
 			return vo;
 		}
 		try {
+			// 创建订单
 			HongbaodianOrder order = hongbaodianOrderService.createOrder("buy" + product.getName(), productId, memberId,
 					memberId, reqIP);
 			hongbaodianOrderCmdService.createOrder(order.getId());
+			// 支付红包点
 			AccountingRecord record = memberHongbaodianCmdService.withdraw(memberId, price, "buy hongbaodianproduct",
 					System.currentTimeMillis());
-			if (order.getRewardRMB() > 0) {// 现金返利
-				Map<String, String> responseMap = wxPayService.rewardAgent(order);
-				hongbaodianOrderCmdService.finishOrder(order.getId());
-				hongbaodianOrderService.finishOrder(order, responseMap, "FINISH");
-			}
 			MemberHongbaodianRecordDbo dbo = memberHongbaodianService.withdraw(record, memberId);
 			hongbaodianRecordMsgService.newRecord(dbo);
+			// 返利
+			if (order.getRewardRMB() > 0) {// 现金返利
+				giveRewardRMBToMember(order, price);
+			}
 		} catch (MemberNotFoundException e) {
 			vo.setSuccess(false);
 			vo.setMsg("MemberNotFoundException");
@@ -159,25 +163,24 @@ public class HongbaodianProductController {
 			vo.setSuccess(false);
 			vo.setMsg("OrderHasAlreadyExistenceException");
 			return vo;
-		} catch (OrderNotFoundException e) {
-			vo.setSuccess(false);
-			vo.setMsg("OrderNotFoundException");
-			return vo;
-		} catch (Exception e) {
-			try {
-				AccountingRecord record = memberHongbaodianCmdService.giveHongbaodianToMember(memberId, price,
-						"return for buy fail", System.currentTimeMillis());
-				MemberHongbaodianRecordDbo dbo = memberHongbaodianService.withdraw(record, memberId);
-				hongbaodianRecordMsgService.newRecord(dbo);
-			} catch (MemberNotFoundException e1) {
-				vo.setSuccess(false);
-				vo.setMsg("MemberNotFoundException");
-				return vo;
-			}
-			vo.setSuccess(false);
-			vo.setMsg("OrderHasAlreadyExistenceException");
-			return vo;
 		}
 		return vo;
+	}
+
+	/**
+	 * 红包奖励
+	 */
+	private void giveRewardRMBToMember(HongbaodianOrder order, int price) {
+		// 实际仍是单线程
+		executorService.submit(() -> {
+			try {
+				Map<String, String> responseMap = wxPayService.rewardAgent(order);
+				hongbaodianOrderCmdService.finishOrder(order.getId());
+				hongbaodianOrderService.finishOrder(order, responseMap, "FINISH");
+			} catch (Exception e) {
+				// 奖励失败时由后台客服补偿
+				e.printStackTrace();
+			}
+		});
 	}
 }
