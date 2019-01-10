@@ -14,11 +14,11 @@ import com.anbang.qipai.hongbao.cqrs.c.domain.hongbaodian.MemberHasHongbaodianAc
 import com.anbang.qipai.hongbao.cqrs.c.domain.member.MemberNotFoundException;
 import com.anbang.qipai.hongbao.cqrs.c.service.MemberAuthService;
 import com.anbang.qipai.hongbao.cqrs.c.service.MemberHongbaodianCmdService;
+import com.anbang.qipai.hongbao.cqrs.q.dbo.MemberDbo;
 import com.anbang.qipai.hongbao.cqrs.q.dbo.MemberHongbaodianRecordDbo;
+import com.anbang.qipai.hongbao.cqrs.q.service.MemberAuthQueryService;
 import com.anbang.qipai.hongbao.cqrs.q.service.MemberHongbaodianService;
 import com.anbang.qipai.hongbao.msg.service.HongbaodianRecordMsgService;
-import com.anbang.qipai.hongbao.plan.bean.MemberDbo;
-import com.anbang.qipai.hongbao.plan.service.MemberService;
 import com.anbang.qipai.hongbao.web.vo.CommonVO;
 import com.dml.accounting.AccountingRecord;
 import com.dml.accounting.InsufficientBalanceException;
@@ -29,7 +29,7 @@ import com.highto.framework.web.page.ListPage;
 public class MemberHongbaodianController {
 
 	@Autowired
-	private MemberService memberService;
+	private MemberAuthQueryService memberAuthQueryService;
 
 	@Autowired
 	private MemberHongbaodianCmdService memberHongbaodianCmdService;
@@ -106,7 +106,7 @@ public class MemberHongbaodianController {
 	@RequestMapping("/createaccount")
 	public CommonVO createAccount() {
 		CommonVO vo = new CommonVO();
-		List<MemberDbo> memberList = memberService.findAllMembers();
+		List<MemberDbo> memberList = memberAuthQueryService.findAllMembers();
 		try {
 			for (MemberDbo member : memberList) {
 				CreateHongbaodianAccountResult result = memberHongbaodianCmdService

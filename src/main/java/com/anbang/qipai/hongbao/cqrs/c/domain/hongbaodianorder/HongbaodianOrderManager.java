@@ -33,7 +33,10 @@ public class HongbaodianOrderManager {
 	/**
 	 * 完成订单
 	 */
-	public String finishOrder(String orderId) {
+	public String finishOrder(String orderId) throws OrderNotFoundException {
+		if (!lowOrderIdMap.containsKey(orderId) && !heighOrderIdMap.containsKey(orderId)) {
+			throw new OrderNotFoundException();
+		}
 		lowOrderIdMap.remove(orderId);
 		heighOrderIdMap.remove(orderId);
 		return orderId;

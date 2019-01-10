@@ -4,6 +4,7 @@ import org.springframework.stereotype.Component;
 
 import com.anbang.qipai.hongbao.cqrs.c.domain.hongbaodianorder.HongbaodianOrderManager;
 import com.anbang.qipai.hongbao.cqrs.c.domain.hongbaodianorder.OrderHasAlreadyExistenceException;
+import com.anbang.qipai.hongbao.cqrs.c.domain.hongbaodianorder.OrderNotFoundException;
 import com.anbang.qipai.hongbao.cqrs.c.service.HongbaodianOrderCmdService;
 
 @Component
@@ -18,7 +19,7 @@ public class HongbaodianOrderCmdServiceImpl extends CmdServiceBase implements Ho
 	}
 
 	@Override
-	public String finishOrder(String orderId) {
+	public String finishOrder(String orderId) throws OrderNotFoundException {
 		HongbaodianOrderManager hongbaodianOrderManager = singletonEntityRepository
 				.getEntity(HongbaodianOrderManager.class);
 		String id = hongbaodianOrderManager.finishOrder(orderId);

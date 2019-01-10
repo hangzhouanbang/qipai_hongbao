@@ -15,4 +15,6 @@ public interface HongbaodianProductDao {
 	int countAmount();
 
 	List<HongbaodianProduct> findAllHongbaodianProducts(int page, int size);
+
+	HongbaodianProduct findById(String productId);
 }

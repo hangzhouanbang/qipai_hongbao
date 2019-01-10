@@ -1,8 +1,8 @@
-package com.anbang.qipai.hongbao.plan.dao;
+package com.anbang.qipai.hongbao.cqrs.q.dao;
 
 import java.util.List;
 
-import com.anbang.qipai.hongbao.plan.bean.MemberDbo;
+import com.anbang.qipai.hongbao.cqrs.q.dbo.MemberDbo;
 
 public interface MemberDboDao {
 

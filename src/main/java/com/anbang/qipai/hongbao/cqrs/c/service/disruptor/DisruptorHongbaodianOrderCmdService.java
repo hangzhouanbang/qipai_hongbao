@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.anbang.qipai.hongbao.cqrs.c.domain.hongbaodianorder.OrderHasAlreadyExistenceException;
+import com.anbang.qipai.hongbao.cqrs.c.domain.hongbaodianorder.OrderNotFoundException;
 import com.anbang.qipai.hongbao.cqrs.c.service.HongbaodianOrderCmdService;
 import com.anbang.qipai.hongbao.cqrs.c.service.impl.HongbaodianOrderCmdServiceImpl;
 import com.highto.framework.concurrent.DeferredResult;
@@ -25,12 +26,16 @@ public class DisruptorHongbaodianOrderCmdService extends DisruptorCmdServiceBase
 		try {
 			return result.getResult();
 		} catch (Exception e) {
-			throw new RuntimeException(e);
+			if (e instanceof OrderHasAlreadyExistenceException) {
+				throw (OrderHasAlreadyExistenceException) e;
+			} else {
+				throw new RuntimeException(e);
+			}
 		}
 	}
 
 	@Override
-	public String finishOrder(String orderId) {
+	public String finishOrder(String orderId) throws OrderNotFoundException {
 		CommonCommand cmd = new CommonCommand(HongbaodianOrderCmdServiceImpl.class.getName(), "finishOrder", orderId);
 		DeferredResult<String> result = publishEvent(disruptorFactory.getCoreCmdDisruptor(), cmd, () -> {
 			String id = hongbaodianOrderCmdServiceImpl.finishOrder(cmd.getParameter());
@@ -39,7 +44,11 @@ public class DisruptorHongbaodianOrderCmdService extends DisruptorCmdServiceBase
 		try {
 			return result.getResult();
 		} catch (Exception e) {
-			throw new RuntimeException(e);
+			if (e instanceof OrderNotFoundException) {
+				throw (OrderNotFoundException) e;
+			} else {
+				throw new RuntimeException(e);
+			}
 		}
 	}
 

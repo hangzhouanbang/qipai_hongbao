@@ -7,4 +7,6 @@ public interface MemberInvitationRecordDao {
 	void insert(MemberInvitationRecord record);
 
 	MemberInvitationRecord findByMemberIdAndInvitationMemberId(String memberId, String invitationMemberId);
+
+	MemberInvitationRecord findByInvitationMemberId(String invitationMemberId);
 }

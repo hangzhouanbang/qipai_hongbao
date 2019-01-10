@@ -176,7 +176,7 @@ public class WXPayService {
 	 * @param parameters
 	 * @return
 	 */
-	public String createSign(SortedMap<String, String> parameters) {
+	private String createSign(SortedMap<String, String> parameters) {
 		StringBuffer sb = new StringBuffer();
 		Set es = parameters.entrySet();
 		Iterator it = es.iterator();

@@ -33,4 +33,8 @@ public class HongbaodianProductService {
 		ListPage listPage = new ListPage(productList, page, size, amount);
 		return listPage;
 	}
+
+	public HongbaodianProduct findHongbaodianProductByProductId(String productId) {
+		return hongbaodianProductDao.findById(productId);
+	}
 }
