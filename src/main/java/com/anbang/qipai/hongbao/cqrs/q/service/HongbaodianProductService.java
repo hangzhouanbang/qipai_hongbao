@@ -23,8 +23,8 @@ public class HongbaodianProductService {
 		hongbaodianProductDao.update(product);
 	}
 
-	public void removeHongbaodianProductById(String id) {
-		hongbaodianProductDao.remove(id);
+	public void removeHongbaodianProductById(String[] productIds) {
+		hongbaodianProductDao.remove(productIds);
 	}
 
 	public ListPage showHongbaodianProducts(int page, int size) {

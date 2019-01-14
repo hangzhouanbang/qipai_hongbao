@@ -28,10 +28,10 @@ public class HongbaodianProductMsgService {
 		hongbaodianProductSource.hongbaodianProduct().send(MessageBuilder.withPayload(mo).build());
 	}
 
-	public void removeHongbaodianProduct(String productId) {
+	public void removeHongbaodianProduct(String[] productIds) {
 		CommonMO mo = new CommonMO();
 		mo.setMsg("remove product");
-		mo.setData(productId);
+		mo.setData(productIds);
 		hongbaodianProductSource.hongbaodianProduct().send(MessageBuilder.withPayload(mo).build());
 	}
 }

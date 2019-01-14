@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 
 import com.anbang.qipai.hongbao.cqrs.c.service.MemberAuthService;
 import com.anbang.qipai.hongbao.cqrs.q.service.MemberAuthQueryService;
+import com.anbang.qipai.hongbao.msg.service.MemberInvitationRecordMsgService;
 import com.anbang.qipai.hongbao.plan.bean.MemberInvitationRecord;
 import com.anbang.qipai.hongbao.plan.service.MemberInvitationRecordService;
 import com.anbang.qipai.hongbao.remote.service.QipaiMembersRemoteService;
@@ -43,6 +44,9 @@ public class MemberController {
 
 	@Autowired
 	private MemberInvitationRecordService memberInvitationRecordService;
+
+	@Autowired
+	private MemberInvitationRecordMsgService memberInvitationRecordMsgService;
 
 	@Autowired
 	private QipaiMembersRemoteService qipaiMembersRemoteService;
@@ -96,6 +100,7 @@ public class MemberController {
 				record.setInvitationMemberId(memberId);
 				record.setCreateTime(System.currentTimeMillis());
 				memberInvitationRecordService.insertMemberInvitationRecord(record);
+				memberInvitationRecordMsgService.newRecord(record);
 			}
 		}
 		return "redirect:http://scs.3cscy.com/majiang/u3D/html/xiazai.html";

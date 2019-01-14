@@ -1,5 +1,7 @@
 package com.anbang.qipai.hongbao.msg.receiver;
 
+import java.util.Map;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.stream.annotation.EnableBinding;
 import org.springframework.cloud.stream.annotation.StreamListener;
@@ -28,12 +30,15 @@ public class HongbaoMsgReceiver {
 	/**
 	 * 任务完成发放红包
 	 */
-	@StreamListener(HongbaoSink.HONGBAO)
+	@StreamListener(HongbaoSink.MEMBERHONGBAORMBACCOUNTING)
 	public void recordMembers(CommonMO mo) {
 		String msg = mo.getMsg();
 		String json = gson.toJson(mo.getData());
-		if ("newMember".equals(msg)) {
-
+		if ("give_hongbao_to_member".equals(msg)) {
+			Map data = gson.fromJson(json, Map.class);
+			String memberId = (String) data.get("memberId");
+			double amount = (Double) data.get("amount");
+			String textSummary = (String) data.get("textSummary");
 		}
 	}
 }

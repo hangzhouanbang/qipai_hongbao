@@ -8,6 +8,7 @@ import java.util.concurrent.Executors;
 import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -70,27 +71,36 @@ public class HongbaodianProductController {
 
 	private ExecutorService executorService = Executors.newCachedThreadPool();
 
+	/**
+	 * 添加红包点商品
+	 */
 	@RequestMapping("add_product")
-	public CommonVO addHongbaodianProduct(HongbaodianProduct product) {
+	public CommonVO addHongbaodianProduct(@RequestBody HongbaodianProduct product) {
 		CommonVO vo = new CommonVO();
 		hongbaodianProductService.insertHongbaodianProduct(product);
 		hongbaodianProductMsgService.addHongbaodianProduct(product);
 		return vo;
 	}
 
+	/**
+	 * 修改红包点商品
+	 */
 	@RequestMapping("update_product")
-	public CommonVO updateHongbaodianProduct(HongbaodianProduct product) {
+	public CommonVO updateHongbaodianProduct(@RequestBody HongbaodianProduct product) {
 		CommonVO vo = new CommonVO();
 		hongbaodianProductService.updateHongbaodianProduct(product);
 		hongbaodianProductMsgService.updateHongbaodianProduct(product);
 		return vo;
 	}
 
+	/**
+	 * 删除红包点商品
+	 */
 	@RequestMapping("remove_product_by_id")
-	public CommonVO removeHongbaodianProductById(String productId) {
+	public CommonVO removeHongbaodianProductById(@RequestBody String[] productIds) {
 		CommonVO vo = new CommonVO();
-		hongbaodianProductService.removeHongbaodianProductById(productId);
-		hongbaodianProductMsgService.removeHongbaodianProduct(productId);
+		hongbaodianProductService.removeHongbaodianProductById(productIds);
+		hongbaodianProductMsgService.removeHongbaodianProduct(productIds);
 		return vo;
 	}
 

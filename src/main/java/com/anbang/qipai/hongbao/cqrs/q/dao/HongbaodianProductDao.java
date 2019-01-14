@@ -10,7 +10,7 @@ public interface HongbaodianProductDao {
 
 	void update(HongbaodianProduct product);
 
-	void remove(String id);
+	void remove(String[] productIds);
 
 	int countAmount();
 
