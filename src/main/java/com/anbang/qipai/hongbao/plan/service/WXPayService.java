@@ -30,6 +30,7 @@ import org.springframework.stereotype.Service;
 
 import com.anbang.qipai.hongbao.conf.WXPayConfig;
 import com.anbang.qipai.hongbao.cqrs.q.dbo.HongbaodianOrder;
+import com.anbang.qipai.hongbao.cqrs.q.dbo.RewardOrderDbo;
 import com.anbang.qipai.hongbao.util.MD5Util;
 import com.anbang.qipai.hongbao.util.XMLObjectConvertUtil;
 
@@ -41,6 +42,14 @@ public class WXPayService {
 	private CloseableHttpClient httpClient;// HTTP请求器
 
 	public Map<String, String> rewardAgent(HongbaodianOrder order) throws Exception {
+		String orderInfo = createRewardInfo(order);
+		SortedMap<String, String> responseMap = reward(orderInfo);
+		String queryInfo = createQueryRewardInfo(order);
+		responseMap = queryReward(queryInfo);
+		return responseMap;
+	}
+
+	public Map<String, String> rewardAgent(RewardOrderDbo order) throws Exception {
 		String orderInfo = createRewardInfo(order);
 		SortedMap<String, String> responseMap = reward(orderInfo);
 		String queryInfo = createQueryRewardInfo(order);
@@ -99,7 +108,35 @@ public class WXPayService {
 		// 商户订单号
 		parameters.put("partner_trade_no", order.getId());
 		// 用户openid
-		parameters.put("openid", order.getPayerOpenId());
+		parameters.put("openid", order.getReceiverOpenId());
+		// 校验用户姓名选项
+		parameters.put("check_name", "NO_CHECK");
+		// 收款用户姓名
+		// parameters.put("re_user_name", order.getRe_user_name());
+		// 金额
+		parameters.put("amount", Integer.toString((int) (order.getRewardRMB() * 100)));
+		// 企业付款备注
+		parameters.put("desc", order.getDesc());
+		// 服务端实际ip
+		parameters.put("spbill_create_ip", order.getReqIP());
+		parameters.put("sign", createSign(parameters));
+		String xml = XMLObjectConvertUtil.praseMapToXML(parameters);
+		return xml;
+	}
+
+	private String createRewardInfo(RewardOrderDbo order) {
+		// 创建可排序的Map集合
+		SortedMap<String, String> parameters = new TreeMap<String, String>();
+		// 应用id
+		parameters.put("mch_appid", WXPayConfig.APPID);
+		// 商户号
+		parameters.put("mchid", WXPayConfig.MCH_ID);
+		// 随机字符串
+		parameters.put("nonce_str", UUID.randomUUID().toString().replace("-", ""));
+		// 商户订单号
+		parameters.put("partner_trade_no", order.getId());
+		// 用户openid
+		parameters.put("openid", order.getReceiverOpenId());
 		// 校验用户姓名选项
 		parameters.put("check_name", "NO_CHECK");
 		// 收款用户姓名
@@ -155,6 +192,22 @@ public class WXPayService {
 	}
 
 	private String createQueryRewardInfo(HongbaodianOrder order) {
+		// 创建可排序的Map集合
+		SortedMap<String, String> parameters = new TreeMap<String, String>();
+		// 应用id
+		parameters.put("appid", WXPayConfig.APPID);
+		// 商户号
+		parameters.put("mch_id", WXPayConfig.MCH_ID);
+		// 随机字符串
+		parameters.put("nonce_str", UUID.randomUUID().toString().replace("-", ""));
+		// 商户订单号
+		parameters.put("partner_trade_no", order.getId());
+		parameters.put("sign", createSign(parameters));
+		String xml = XMLObjectConvertUtil.praseMapToXML(parameters);
+		return xml;
+	}
+
+	private String createQueryRewardInfo(RewardOrderDbo order) {
 		// 创建可排序的Map集合
 		SortedMap<String, String> parameters = new TreeMap<String, String>();
 		// 应用id

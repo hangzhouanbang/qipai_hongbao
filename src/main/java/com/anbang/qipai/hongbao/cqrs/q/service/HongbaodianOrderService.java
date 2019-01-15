@@ -36,8 +36,7 @@ public class HongbaodianOrderService {
 	@Autowired
 	private AuthorizationDboDao authorizationDboDao;
 
-	public HongbaodianOrder createOrder(String desc, String productId, String payerId, String receiverId,
-			String reqIP) {
+	public HongbaodianOrder createOrder(String desc, String productId, String payerId, String receiverId) {
 		HongbaodianOrder order = new HongbaodianOrder();
 		String id = UUID.randomUUID().toString().replace("-", "");
 		order.setId(id);
@@ -58,10 +57,15 @@ public class HongbaodianOrderService {
 		MemberDbo receiver = memberDboDao.findByMemberId(receiverId);
 		order.setReceiverId(receiver.getId());
 		order.setReceiverName(receiver.getNickname());
-		AuthorizationDbo receiverAuthDbo = authorizationDboDao.findAuthorizationDboByAgentIdAndPublisher(true, payerId,
-				"open.weixin.app.qipai");
+		AuthorizationDbo receiverAuthDbo = authorizationDboDao.findAuthorizationDboByAgentIdAndPublisher(true,
+				receiverId, "open.weixin.app.qipai");
 		order.setReceiverOpenId(receiverAuthDbo.getUuid());
-		order.setReqIP(reqIP);
+		String spbill_create_ip = null;
+		try {
+			spbill_create_ip = IPUtil.getLocalHostRelIP();
+		} catch (Exception e) {
+		}
+		order.setReqIP(spbill_create_ip);
 		order.setStatus("WAIT_BUYER_PAY");
 		order.setCreateTime(System.currentTimeMillis());
 		order.setDesc(desc);
@@ -73,11 +77,6 @@ public class HongbaodianOrderService {
 			info.setDesc(order.getDesc());
 			info.setAmount(order.getRewardRMB());
 			info.setCreateTime(System.currentTimeMillis());
-			String spbill_create_ip = null;
-			try {
-				spbill_create_ip = IPUtil.getLocalHostRelIP();
-			} catch (Exception e) {
-			}
 			info.setSpbill_create_ip(spbill_create_ip);
 			payInfoDao.insert(info);
 		}

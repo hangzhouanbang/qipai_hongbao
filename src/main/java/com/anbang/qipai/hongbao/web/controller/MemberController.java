@@ -13,6 +13,8 @@ import org.eclipse.jetty.util.StringUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.anbang.qipai.hongbao.cqrs.c.service.MemberAuthService;
 import com.anbang.qipai.hongbao.cqrs.q.service.MemberAuthQueryService;
@@ -21,7 +23,9 @@ import com.anbang.qipai.hongbao.plan.bean.MemberInvitationRecord;
 import com.anbang.qipai.hongbao.plan.service.MemberInvitationRecordService;
 import com.anbang.qipai.hongbao.remote.service.QipaiMembersRemoteService;
 import com.anbang.qipai.hongbao.remote.vo.CommonRemoteVO;
+import com.anbang.qipai.hongbao.web.vo.CommonVO;
 import com.google.gson.Gson;
+import com.highto.framework.web.page.ListPage;
 
 @Controller
 @RequestMapping("/member")
@@ -104,6 +108,24 @@ public class MemberController {
 			}
 		}
 		return "redirect:http://scs.3cscy.com/majiang/u3D/html/xiazai.html";
+	}
+
+	@RequestMapping("/queryinvitation")
+	@ResponseBody
+	public CommonVO queryInvitationRecord(@RequestParam(defaultValue = "1") int page,
+			@RequestParam(defaultValue = "10") int size, String token) {
+		CommonVO vo = new CommonVO();
+		String memberId = memberAuthService.getMemberIdBySessionId(token);
+		if (memberId == null) {
+			vo.setSuccess(false);
+			vo.setMsg("invalid token");
+			return vo;
+		}
+		ListPage listPage = memberInvitationRecordService.findMemberInvitationRecordByMemberId(page, size, memberId);
+		Map data = new HashMap<>();
+		data.put("listPage", listPage);
+		vo.setData(data);
+		return vo;
 	}
 
 	private Map takeOauth2AccessToken(String code) throws InterruptedException, ExecutionException, TimeoutException {

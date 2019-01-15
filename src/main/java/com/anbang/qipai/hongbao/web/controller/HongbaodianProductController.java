@@ -5,8 +5,6 @@ import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import javax.servlet.http.HttpServletRequest;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -29,7 +27,6 @@ import com.anbang.qipai.hongbao.cqrs.q.service.MemberHongbaodianService;
 import com.anbang.qipai.hongbao.msg.service.HongbaodianProductMsgService;
 import com.anbang.qipai.hongbao.msg.service.HongbaodianRecordMsgService;
 import com.anbang.qipai.hongbao.plan.service.WXPayService;
-import com.anbang.qipai.hongbao.util.IPUtil;
 import com.anbang.qipai.hongbao.web.vo.CommonVO;
 import com.dml.accounting.AccountingRecord;
 import com.dml.accounting.InsufficientBalanceException;
@@ -124,7 +121,7 @@ public class HongbaodianProductController {
 	 * 红包点兑换
 	 */
 	@RequestMapping("/buy_hongbaodianproduct")
-	public CommonVO buyHongbaodianProduct(String token, String productId, HttpServletRequest request) {
+	public CommonVO buyHongbaodianProduct(String token, String productId) {
 		CommonVO vo = new CommonVO();
 		String memberId = memberAuthService.getMemberIdBySessionId(token);
 		if (memberId == null) {
@@ -139,7 +136,6 @@ public class HongbaodianProductController {
 			return vo;
 		}
 		int price = product.getPrice();
-		String reqIP = IPUtil.getRealIp(request);
 		AuthorizationDbo openAthDbo = memberAuthQueryService.findAuthorizationDboByAgentIdAndPublisher(memberId,
 				"open.weixin.app.qipai");
 		if (openAthDbo == null) {
@@ -150,7 +146,7 @@ public class HongbaodianProductController {
 		try {
 			// 创建订单
 			HongbaodianOrder order = hongbaodianOrderService.createOrder("buy" + product.getName(), productId, memberId,
-					memberId, reqIP);
+					memberId);
 			hongbaodianOrderCmdService.createOrder(order.getId());
 			// 支付红包点
 			AccountingRecord record = memberHongbaodianCmdService.withdraw(memberId, price, "buy hongbaodianproduct",

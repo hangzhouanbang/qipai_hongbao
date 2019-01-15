@@ -1,31 +1,37 @@
 package com.anbang.qipai.hongbao.msg.receiver;
 
 import java.util.Map;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.stream.annotation.EnableBinding;
 import org.springframework.cloud.stream.annotation.StreamListener;
 
-import com.anbang.qipai.hongbao.cqrs.q.service.MemberAuthQueryService;
+import com.anbang.qipai.hongbao.cqrs.c.domain.hongbaodianorder.OrderHasAlreadyExistenceException;
+import com.anbang.qipai.hongbao.cqrs.c.service.HongbaodianOrderCmdService;
+import com.anbang.qipai.hongbao.cqrs.q.dbo.RewardOrderDbo;
+import com.anbang.qipai.hongbao.cqrs.q.service.RewardOrderService;
 import com.anbang.qipai.hongbao.msg.channel.sink.HongbaoSink;
 import com.anbang.qipai.hongbao.msg.msjobs.CommonMO;
 import com.anbang.qipai.hongbao.plan.service.WXPayService;
-import com.anbang.qipai.hongbao.remote.service.QipaiMembersRemoteService;
 import com.google.gson.Gson;
 
 @EnableBinding(HongbaoSink.class)
 public class HongbaoMsgReceiver {
 
 	@Autowired
-	private MemberAuthQueryService memberAuthQueryService;
+	private RewardOrderService rewardOrderService;
+
+	@Autowired
+	private HongbaodianOrderCmdService hongbaodianOrderCmdService;
 
 	@Autowired
 	private WXPayService wxPayService;
 
-	@Autowired
-	private QipaiMembersRemoteService qipaiMembersRemoteService;
-
 	private Gson gson = new Gson();
+
+	private ExecutorService executorService = Executors.newCachedThreadPool();
 
 	/**
 	 * 任务完成发放红包
@@ -34,11 +40,33 @@ public class HongbaoMsgReceiver {
 	public void recordMembers(CommonMO mo) {
 		String msg = mo.getMsg();
 		String json = gson.toJson(mo.getData());
-		if ("give_hongbao_to_member".equals(msg)) {
+		if ("give_hongbaormb_to_member".equals(msg)) {
 			Map data = gson.fromJson(json, Map.class);
 			String memberId = (String) data.get("memberId");
 			double amount = (Double) data.get("amount");
 			String textSummary = (String) data.get("textSummary");
+			// 创建订单
+			RewardOrderDbo order = rewardOrderService.createOrder(textSummary, amount, memberId);
+			try {
+				hongbaodianOrderCmdService.createOrder(order.getId());
+			} catch (OrderHasAlreadyExistenceException e1) {
+				e1.printStackTrace();
+			}
+
+			// 返利
+			if (order.getRewardRMB() > 0) {// 现金返利
+				// 实际仍是单线程
+				executorService.submit(() -> {
+					try {
+						Map<String, String> responseMap = wxPayService.rewardAgent(order);
+						hongbaodianOrderCmdService.finishOrder(order.getId());
+						rewardOrderService.finishOrder(order, responseMap, "FINISH");
+					} catch (Exception e) {
+						// 奖励失败时由后台客服补偿
+						e.printStackTrace();
+					}
+				});
+			}
 		}
 	}
 }

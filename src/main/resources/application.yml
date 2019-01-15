@@ -59,13 +59,6 @@ spring:
             concurrency: 1
             partitioned: false
           contentType: application/json
-        memberLoginRecord:
-          destination: memberLoginRecord
-          group: qipai-hongbao
-          consumer:
-            concurrency: 1
-            partitioned: false
-          contentType: application/json
         memberHongbaoRMBAccounting:
           destination: memberHongbaoRMBAccounting
           group: qipai-hongbao
