@@ -50,7 +50,7 @@ public class RewardOrderService {
 			spbill_create_ip = IPUtil.getLocalHostRelIP();
 		} catch (Exception e) {
 		}
-		order.setReqIP(spbill_create_ip);
+		order.setSpbill_create_ip(spbill_create_ip);
 		rewardOrderDboDao.insert(order);
 
 		PayInfo info = new PayInfo();

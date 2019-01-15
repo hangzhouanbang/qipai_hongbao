@@ -37,10 +37,12 @@ public class HongbaodianOrderService {
 	@Autowired
 	private AuthorizationDboDao authorizationDboDao;
 
-	public HongbaodianOrder createOrder(String desc, String productId, String payerId, String receiverId) {
+	public HongbaodianOrder createOrder(String desc, String productId, String payerId, String receiverId,
+			String reqIP) {
 		HongbaodianOrder order = new HongbaodianOrder();
 		String id = UUID.randomUUID().toString().replace("-", "");
 		order.setId(id);
+		order.setReqIP(reqIP);
 		// 支付人
 		MemberDbo payer = memberDboDao.findByMemberId(payerId);
 		order.setPayerId(payer.getId());

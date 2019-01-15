@@ -14,6 +14,7 @@ import com.anbang.qipai.hongbao.cqrs.q.dbo.RewardOrderDbo;
 import com.anbang.qipai.hongbao.cqrs.q.service.RewardOrderService;
 import com.anbang.qipai.hongbao.msg.channel.sink.HongbaoSink;
 import com.anbang.qipai.hongbao.msg.msjobs.CommonMO;
+import com.anbang.qipai.hongbao.msg.service.RewardOrderDboMsgService;
 import com.anbang.qipai.hongbao.plan.service.WXPayService;
 import com.google.gson.Gson;
 
@@ -28,6 +29,9 @@ public class HongbaoMsgReceiver {
 
 	@Autowired
 	private WXPayService wxPayService;
+
+	@Autowired
+	private RewardOrderDboMsgService rewardOrderDboMsgService;
 
 	private Gson gson = new Gson();
 
@@ -49,6 +53,7 @@ public class HongbaoMsgReceiver {
 			RewardOrderDbo order = rewardOrderService.createOrder(textSummary, amount, memberId);
 			try {
 				hongbaodianOrderCmdService.createOrder(order.getId());
+				rewardOrderDboMsgService.recordRewardOrderDbo(order);
 			} catch (OrderHasAlreadyExistenceException e1) {
 				e1.printStackTrace();
 			}
@@ -60,7 +65,8 @@ public class HongbaoMsgReceiver {
 					try {
 						Map<String, String> responseMap = wxPayService.rewardAgent(order);
 						hongbaodianOrderCmdService.finishOrder(order.getId());
-						rewardOrderService.finishOrder(order, responseMap, "FINISH");
+						RewardOrderDbo finishOrder = rewardOrderService.finishOrder(order, responseMap, "FINISH");
+						rewardOrderDboMsgService.finishRewardOrderDbo(finishOrder);
 					} catch (Exception e) {
 						// 奖励失败时由后台客服补偿
 						e.printStackTrace();

@@ -14,7 +14,7 @@ public class RewardOrderDbo {
 	private String receiverName;// 收货人昵称
 	private String receiverOpenId;// 收货人openid
 	private double rewardRMB;// 奖励现金
-	private String reqIP;// 终端IP
+	private String spbill_create_ip;// 终端IP
 	private long createTime;// 创建时间
 	private long finishTime;// 完成时间
 
@@ -66,20 +66,20 @@ public class RewardOrderDbo {
 		this.receiverOpenId = receiverOpenId;
 	}
 
-	public String getReqIP() {
-		return reqIP;
-	}
-
-	public void setReqIP(String reqIP) {
-		this.reqIP = reqIP;
-	}
-
 	public double getRewardRMB() {
 		return rewardRMB;
 	}
 
 	public void setRewardRMB(double rewardRMB) {
 		this.rewardRMB = rewardRMB;
+	}
+
+	public String getSpbill_create_ip() {
+		return spbill_create_ip;
+	}
+
+	public void setSpbill_create_ip(String spbill_create_ip) {
+		this.spbill_create_ip = spbill_create_ip;
 	}
 
 	public long getCreateTime() {

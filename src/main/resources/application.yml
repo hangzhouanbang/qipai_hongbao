@@ -33,6 +33,36 @@ spring:
                   ms: 5
                 batch:
                   size: 16384
+          hongbaodianProduct:
+            producer:
+              configuration:
+                request:
+                  timeout:
+                    ms: 30000
+                linger:
+                  ms: 5
+                batch:
+                  size: 16384
+          hongbaodianOrder:
+            producer:
+              configuration:
+                request:
+                  timeout:
+                    ms: 30000
+                linger:
+                  ms: 5
+                batch:
+                  size: 16384
+          rewardOrderDbo:
+            producer:
+              configuration:
+                request:
+                  timeout:
+                    ms: 30000
+                linger:
+                  ms: 5
+                batch:
+                  size: 16384
                   
       bindings:
         memberHongbaodianRecord:
@@ -42,6 +72,21 @@ spring:
             partitionCount: 1
         memberInvitationRecord:
           destination: memberInvitationRecord
+          contentType: application/json
+          producer:
+            partitionCount: 1
+        hongbaodianProduct:
+          destination: hongbaodianProduct
+          contentType: application/json
+          producer:
+            partitionCount: 1
+        hongbaodianOrder:
+          destination: hongbaodianOrder
+          contentType: application/json
+          producer:
+            partitionCount: 1
+        rewardOrderDbo:
+          destination: rewardOrderDbo
           contentType: application/json
           producer:
             partitionCount: 1

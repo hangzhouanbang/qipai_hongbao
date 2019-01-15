@@ -5,6 +5,8 @@ import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+import javax.servlet.http.HttpServletRequest;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -25,9 +27,11 @@ import com.anbang.qipai.hongbao.cqrs.q.service.HongbaodianOrderService;
 import com.anbang.qipai.hongbao.cqrs.q.service.HongbaodianProductService;
 import com.anbang.qipai.hongbao.cqrs.q.service.MemberAuthQueryService;
 import com.anbang.qipai.hongbao.cqrs.q.service.MemberHongbaodianService;
+import com.anbang.qipai.hongbao.msg.service.HongbaodianOrderMsgService;
 import com.anbang.qipai.hongbao.msg.service.HongbaodianProductMsgService;
 import com.anbang.qipai.hongbao.msg.service.HongbaodianRecordMsgService;
 import com.anbang.qipai.hongbao.plan.service.WXPayService;
+import com.anbang.qipai.hongbao.util.IPUtil;
 import com.anbang.qipai.hongbao.web.vo.CommonVO;
 import com.dml.accounting.AccountingRecord;
 import com.dml.accounting.InsufficientBalanceException;
@@ -66,6 +70,9 @@ public class HongbaodianProductController {
 
 	@Autowired
 	private HongbaodianRecordMsgService hongbaodianRecordMsgService;
+
+	@Autowired
+	private HongbaodianOrderMsgService hongbaodianOrderMsgService;
 
 	private ExecutorService executorService = Executors.newCachedThreadPool();
 
@@ -122,7 +129,7 @@ public class HongbaodianProductController {
 	 * 红包点兑换
 	 */
 	@RequestMapping("/buy_hongbaodianproduct")
-	public CommonVO buyHongbaodianProduct(String token, String productId) {
+	public CommonVO buyHongbaodianProduct(String token, String productId, HttpServletRequest request) {
 		CommonVO vo = new CommonVO();
 		String memberId = memberAuthService.getMemberIdBySessionId(token);
 		if (memberId == null) {
@@ -144,11 +151,13 @@ public class HongbaodianProductController {
 			vo.setMsg("invalid openid");
 			return vo;
 		}
+		String reqIP = IPUtil.getRealIp(request);
 		try {
 			// 创建订单
 			HongbaodianOrder order = hongbaodianOrderService.createOrder("buy" + product.getName(), productId, memberId,
-					memberId);
+					memberId, reqIP);
 			hongbaodianOrderCmdService.createOrder(order.getId());
+			hongbaodianOrderMsgService.recordHongbaodianOrder(order);
 			// 支付红包点
 			AccountingRecord record = memberHongbaodianCmdService.withdraw(memberId, price, "buy hongbaodianproduct",
 					System.currentTimeMillis());
@@ -183,7 +192,8 @@ public class HongbaodianProductController {
 			try {
 				Map<String, String> responseMap = wxPayService.rewardAgent(order);
 				hongbaodianOrderCmdService.finishOrder(order.getId());
-				hongbaodianOrderService.finishOrder(order, responseMap, "FINISH");
+				HongbaodianOrder finishOrder = hongbaodianOrderService.finishOrder(order, responseMap, "FINISH");
+				hongbaodianOrderMsgService.finishHongbaodianOrder(finishOrder);
 			} catch (Exception e) {
 				// 奖励失败时由后台客服补偿
 				e.printStackTrace();

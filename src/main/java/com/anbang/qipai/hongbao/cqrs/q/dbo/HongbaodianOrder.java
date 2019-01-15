@@ -21,7 +21,8 @@ public class HongbaodianOrder {
 	private int productPrice;// 商品价格（红包点）
 	private RewardType rewardType;// 奖励类型
 	private double rewardNum;// 奖励数量
-	private String reqIP;// 终端IP
+	private String reqIP;// 下订单IP
+	private String spbill_create_ip;// 终端IP
 	private long createTime;// 创建时间
 	private long finishTime;// 完成时间
 
@@ -143,6 +144,14 @@ public class HongbaodianOrder {
 
 	public void setReqIP(String reqIP) {
 		this.reqIP = reqIP;
+	}
+
+	public String getSpbill_create_ip() {
+		return spbill_create_ip;
+	}
+
+	public void setSpbill_create_ip(String spbill_create_ip) {
+		this.spbill_create_ip = spbill_create_ip;
 	}
 
 	public long getCreateTime() {

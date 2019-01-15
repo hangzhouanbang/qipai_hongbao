@@ -118,7 +118,7 @@ public class WXPayService {
 		// 企业付款备注
 		parameters.put("desc", order.getDesc());
 		// 服务端实际ip
-		parameters.put("spbill_create_ip", order.getReqIP());
+		parameters.put("spbill_create_ip", order.getSpbill_create_ip());
 		parameters.put("sign", createSign(parameters));
 		String xml = XMLObjectConvertUtil.praseMapToXML(parameters);
 		return xml;
@@ -146,7 +146,7 @@ public class WXPayService {
 		// 企业付款备注
 		parameters.put("desc", order.getDesc());
 		// 服务端实际ip
-		parameters.put("spbill_create_ip", order.getReqIP());
+		parameters.put("spbill_create_ip", order.getSpbill_create_ip());
 		parameters.put("sign", createSign(parameters));
 		String xml = XMLObjectConvertUtil.praseMapToXML(parameters);
 		return xml;
