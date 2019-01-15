@@ -16,6 +16,7 @@ import com.anbang.qipai.hongbao.cqrs.q.dbo.HongbaodianOrder;
 import com.anbang.qipai.hongbao.cqrs.q.dbo.HongbaodianProduct;
 import com.anbang.qipai.hongbao.cqrs.q.dbo.MemberDbo;
 import com.anbang.qipai.hongbao.cqrs.q.dbo.PayInfo;
+import com.anbang.qipai.hongbao.cqrs.q.dbo.RewardType;
 import com.anbang.qipai.hongbao.util.IPUtil;
 
 @Service
@@ -52,7 +53,8 @@ public class HongbaodianOrderService {
 		order.setProductId(product.getId());
 		order.setProduceName(product.getName());
 		order.setProductPrice(product.getPrice());
-		order.setRewardRMB(product.getRewardRMB());
+		order.setRewardType(product.getRewardType());
+		order.setRewardNum(product.getRewardNum());
 		// 收货人
 		MemberDbo receiver = memberDboDao.findByMemberId(receiverId);
 		order.setReceiverId(receiver.getId());
@@ -71,11 +73,11 @@ public class HongbaodianOrderService {
 		order.setDesc(desc);
 		hongbaodianOrderDao.insert(order);
 
-		if (order.getRewardRMB() > 0) {
+		if (order.getRewardType().equals(RewardType.HONGBAORMB)) {
 			PayInfo info = new PayInfo();
 			info.setOrderId(order.getId());
 			info.setDesc(order.getDesc());
-			info.setAmount(order.getRewardRMB());
+			info.setAmount(order.getRewardNum());
 			info.setCreateTime(System.currentTimeMillis());
 			info.setSpbill_create_ip(spbill_create_ip);
 			payInfoDao.insert(info);
@@ -86,7 +88,7 @@ public class HongbaodianOrderService {
 	public HongbaodianOrder finishOrder(HongbaodianOrder order, Map<String, String> responseMap, String status) {
 		hongbaodianOrderDao.updateFinishTime(order.getId(), System.currentTimeMillis());
 		hongbaodianOrderDao.updateStatus(order.getId(), status);
-		if (order.getRewardRMB() > 0) {
+		if (order.getRewardType().equals(RewardType.HONGBAORMB)) {
 			payInfoDao.updateReturnParamsByOrderId(order.getId(), responseMap);
 			payInfoDao.updateFinishTime(order.getId(), System.currentTimeMillis());
 		}

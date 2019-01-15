@@ -19,10 +19,8 @@ public class HongbaodianOrder {
 	private String productId;// 商品id
 	private String produceName;// 商品名称
 	private int productPrice;// 商品价格（红包点）
-	private int rewardYushi;// 奖励玉石
-	private int rewardLiquan;// 奖励礼券
-	private long rewardVipTime;// 奖励会员时间
-	private double rewardRMB;// 奖励现金
+	private RewardType rewardType;// 奖励类型
+	private double rewardNum;// 奖励数量
 	private String reqIP;// 终端IP
 	private long createTime;// 创建时间
 	private long finishTime;// 完成时间
@@ -123,36 +121,20 @@ public class HongbaodianOrder {
 		this.productPrice = productPrice;
 	}
 
-	public int getRewardYushi() {
-		return rewardYushi;
+	public RewardType getRewardType() {
+		return rewardType;
 	}
 
-	public void setRewardYushi(int rewardYushi) {
-		this.rewardYushi = rewardYushi;
+	public void setRewardType(RewardType rewardType) {
+		this.rewardType = rewardType;
 	}
 
-	public int getRewardLiquan() {
-		return rewardLiquan;
+	public double getRewardNum() {
+		return rewardNum;
 	}
 
-	public void setRewardLiquan(int rewardLiquan) {
-		this.rewardLiquan = rewardLiquan;
-	}
-
-	public long getRewardVipTime() {
-		return rewardVipTime;
-	}
-
-	public void setRewardVipTime(long rewardVipTime) {
-		this.rewardVipTime = rewardVipTime;
-	}
-
-	public double getRewardRMB() {
-		return rewardRMB;
-	}
-
-	public void setRewardRMB(double rewardRMB) {
-		this.rewardRMB = rewardRMB;
+	public void setRewardNum(double rewardNum) {
+		this.rewardNum = rewardNum;
 	}
 
 	public String getReqIP() {

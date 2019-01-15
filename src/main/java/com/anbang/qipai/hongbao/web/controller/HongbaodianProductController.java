@@ -20,6 +20,7 @@ import com.anbang.qipai.hongbao.cqrs.q.dbo.AuthorizationDbo;
 import com.anbang.qipai.hongbao.cqrs.q.dbo.HongbaodianOrder;
 import com.anbang.qipai.hongbao.cqrs.q.dbo.HongbaodianProduct;
 import com.anbang.qipai.hongbao.cqrs.q.dbo.MemberHongbaodianRecordDbo;
+import com.anbang.qipai.hongbao.cqrs.q.dbo.RewardType;
 import com.anbang.qipai.hongbao.cqrs.q.service.HongbaodianOrderService;
 import com.anbang.qipai.hongbao.cqrs.q.service.HongbaodianProductService;
 import com.anbang.qipai.hongbao.cqrs.q.service.MemberAuthQueryService;
@@ -154,7 +155,7 @@ public class HongbaodianProductController {
 			MemberHongbaodianRecordDbo dbo = memberHongbaodianService.withdraw(record, memberId);
 			hongbaodianRecordMsgService.newRecord(dbo);
 			// 返利
-			if (order.getRewardRMB() > 0) {// 现金返利
+			if (order.getRewardType().equals(RewardType.HONGBAORMB)) {// 现金返利
 				giveRewardRMBToMember(order, price);
 			}
 		} catch (MemberNotFoundException e) {

@@ -30,7 +30,8 @@ public class MongodbHongbaodianProductDao implements HongbaodianProductDao {
 		Update update = new Update();
 		update.set("name", product.getName());
 		update.set("price", product.getPrice());
-		update.set("rewardRMB", product.getRewardRMB());
+		update.set("rewardType", product.getRewardType());
+		update.set("rewardNum", product.getRewardNum());
 		mongoTemplate.updateFirst(query, update, HongbaodianProduct.class);
 	}
 

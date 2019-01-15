@@ -114,7 +114,7 @@ public class WXPayService {
 		// 收款用户姓名
 		// parameters.put("re_user_name", order.getRe_user_name());
 		// 金额
-		parameters.put("amount", Integer.toString((int) (order.getRewardRMB() * 100)));
+		parameters.put("amount", Integer.toString((int) (order.getRewardNum() * 100)));
 		// 企业付款备注
 		parameters.put("desc", order.getDesc());
 		// 服务端实际ip
