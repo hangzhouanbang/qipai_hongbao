@@ -44,7 +44,7 @@ public class HongbaodianOrderService {
 		MemberDbo payer = memberDboDao.findByMemberId(payerId);
 		order.setPayerId(payer.getId());
 		order.setPayerName(payer.getNickname());
-		AuthorizationDbo payerAuthDbo = authorizationDboDao.findAuthorizationDboByAgentIdAndPublisher(true, payerId,
+		AuthorizationDbo payerAuthDbo = authorizationDboDao.findAuthorizationDboByMemberIdAndPublisher(true, payerId,
 				"open.weixin.app.qipai");
 		order.setPayerOpenId(payerAuthDbo.getUuid());
 		// 商品
@@ -57,7 +57,7 @@ public class HongbaodianOrderService {
 		MemberDbo receiver = memberDboDao.findByMemberId(receiverId);
 		order.setReceiverId(receiver.getId());
 		order.setReceiverName(receiver.getNickname());
-		AuthorizationDbo receiverAuthDbo = authorizationDboDao.findAuthorizationDboByAgentIdAndPublisher(true,
+		AuthorizationDbo receiverAuthDbo = authorizationDboDao.findAuthorizationDboByMemberIdAndPublisher(true,
 				receiverId, "open.weixin.app.qipai");
 		order.setReceiverOpenId(receiverAuthDbo.getUuid());
 		String spbill_create_ip = null;

@@ -10,7 +10,7 @@ import com.anbang.qipai.hongbao.cqrs.c.service.impl.HongbaodianOrderCmdServiceIm
 import com.highto.framework.concurrent.DeferredResult;
 import com.highto.framework.ddd.CommonCommand;
 
-@Component(value = "HongbaodianOrderCmdService")
+@Component(value = "hongbaodianOrderCmdService")
 public class DisruptorHongbaodianOrderCmdService extends DisruptorCmdServiceBase implements HongbaodianOrderCmdService {
 
 	@Autowired

@@ -12,7 +12,7 @@ public interface HongbaodianProductDao {
 
 	void remove(String[] productIds);
 
-	int countAmount();
+	long countAmount();
 
 	List<HongbaodianProduct> findAllHongbaodianProducts(int page, int size);
 

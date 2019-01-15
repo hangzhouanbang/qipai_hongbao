@@ -8,6 +8,6 @@ public interface AuthorizationDboDao {
 
 	void save(AuthorizationDbo authDbo);
 
-	AuthorizationDbo findAuthorizationDboByAgentIdAndPublisher(boolean thirdAuth, String agentId, String publisher);
+	AuthorizationDbo findAuthorizationDboByMemberIdAndPublisher(boolean thirdAuth, String memberId, String publisher);
 
 }

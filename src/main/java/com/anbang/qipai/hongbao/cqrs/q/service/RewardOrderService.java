@@ -38,7 +38,7 @@ public class RewardOrderService {
 		MemberDbo receiver = memberDboDao.findByMemberId(receiverId);
 		order.setReceiverId(receiver.getId());
 		order.setReceiverName(receiver.getNickname());
-		AuthorizationDbo receiverAuthDbo = authorizationDboDao.findAuthorizationDboByAgentIdAndPublisher(true,
+		AuthorizationDbo receiverAuthDbo = authorizationDboDao.findAuthorizationDboByMemberIdAndPublisher(true,
 				receiverId, "open.weixin.app.qipai");
 		order.setReceiverOpenId(receiverAuthDbo.getUuid());
 		order.setRewardRMB(rewardAmount);

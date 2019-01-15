@@ -136,7 +136,7 @@ public class HongbaodianProductController {
 			return vo;
 		}
 		int price = product.getPrice();
-		AuthorizationDbo openAthDbo = memberAuthQueryService.findAuthorizationDboByAgentIdAndPublisher(memberId,
+		AuthorizationDbo openAthDbo = memberAuthQueryService.findAuthorizationDboByMemberIdAndPublisher(memberId,
 				"open.weixin.app.qipai");
 		if (openAthDbo == null) {
 			vo.setSuccess(false);

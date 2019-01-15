@@ -10,7 +10,7 @@ public interface MemberHongbaodianRecordDboDao {
 
 	void remove(String id);
 
-	int countAmountByMemberId(String memberId);
+	long countAmountByMemberId(String memberId);
 
 	List<MemberHongbaodianRecordDbo> findByMemberId(int page, int size, String memberId);
 }

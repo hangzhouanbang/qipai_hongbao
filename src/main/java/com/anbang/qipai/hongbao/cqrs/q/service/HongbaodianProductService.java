@@ -28,9 +28,9 @@ public class HongbaodianProductService {
 	}
 
 	public ListPage showHongbaodianProducts(int page, int size) {
-		int amount = hongbaodianProductDao.countAmount();
+		long amount = hongbaodianProductDao.countAmount();
 		List<HongbaodianProduct> productList = hongbaodianProductDao.findAllHongbaodianProducts(page, size);
-		ListPage listPage = new ListPage(productList, page, size, amount);
+		ListPage listPage = new ListPage(productList, page, size, (int) amount);
 		return listPage;
 	}
 

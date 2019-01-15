@@ -23,8 +23,8 @@ public class MemberAuthQueryService {
 		return authorizationDboDao.find(true, publisher, uuid);
 	}
 
-	public AuthorizationDbo findAuthorizationDboByAgentIdAndPublisher(String agentId, String publisher) {
-		return authorizationDboDao.findAuthorizationDboByAgentIdAndPublisher(true, agentId, publisher);
+	public AuthorizationDbo findAuthorizationDboByMemberIdAndPublisher(String agentId, String publisher) {
+		return authorizationDboDao.findAuthorizationDboByMemberIdAndPublisher(true, agentId, publisher);
 	}
 
 	public void addThirdAuth(AuthorizationDbo authDbo) {

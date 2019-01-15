@@ -60,10 +60,10 @@ public class MemberHongbaodianService {
 	 * 根据用户id查询红包点流水
 	 */
 	public ListPage findMemberHongbaodianRecordByMemberId(int page, int size, String memberId) {
-		int amount = memberHongbaodianRecordDboDao.countAmountByMemberId(memberId);
+		long amount = memberHongbaodianRecordDboDao.countAmountByMemberId(memberId);
 		List<MemberHongbaodianRecordDbo> recordList = memberHongbaodianRecordDboDao.findByMemberId(page, size,
 				memberId);
-		ListPage listPage = new ListPage(recordList, page, size, amount);
+		ListPage listPage = new ListPage(recordList, page, size, (int) amount);
 		return listPage;
 	}
 }

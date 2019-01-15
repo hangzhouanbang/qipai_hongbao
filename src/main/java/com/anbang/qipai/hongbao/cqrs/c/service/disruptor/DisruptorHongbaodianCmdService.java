@@ -13,7 +13,7 @@ import com.dml.accounting.InsufficientBalanceException;
 import com.highto.framework.concurrent.DeferredResult;
 import com.highto.framework.ddd.CommonCommand;
 
-@Component(value = "MemberHongbaodianCmdService")
+@Component(value = "memberHongbaodianCmdService")
 public class DisruptorHongbaodianCmdService extends DisruptorCmdServiceBase implements MemberHongbaodianCmdService {
 
 	@Autowired
