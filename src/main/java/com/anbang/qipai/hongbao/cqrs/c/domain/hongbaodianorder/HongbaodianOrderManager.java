@@ -5,15 +5,22 @@ import java.util.Map;
 
 public class HongbaodianOrderManager {
 	private static int size = 1000;
+	private static long limitTime = 60000;
 	private Map<String, Integer> heighOrderIdMap = new HashMap<>();
 	private Map<String, Integer> lowOrderIdMap = new HashMap<>();
+	private Map<String, String> orderIdPayerIdMap = new HashMap<>();
+	private Map<String, Long> payerIdLimitTimeMap = new HashMap<>();
 
 	/**
 	 * 创建订单
 	 */
-	public String createOrder(String orderId) throws OrderHasAlreadyExistenceException {
+	public String createOrder(String orderId, String payerId, long currentTime)
+			throws OrderHasAlreadyExistenceException, TimeLimitException {
 		if (lowOrderIdMap.containsKey(orderId) || heighOrderIdMap.containsKey(orderId)) {
 			throw new OrderHasAlreadyExistenceException();
+		}
+		if (payerIdLimitTimeMap.get(payerId) > currentTime) {
+			throw new TimeLimitException();
 		}
 		// 将订单号保存在两个map缓存
 		if (size < 500) {
@@ -26,6 +33,8 @@ public class HongbaodianOrderManager {
 			lowOrderIdMap.clear();
 			lowOrderIdMap.put(orderId, size);
 		}
+		orderIdPayerIdMap.put(orderId, payerId);
+		payerIdLimitTimeMap.put(payerId, currentTime + limitTime);
 		size++;
 		return orderId;
 	}
@@ -39,7 +48,15 @@ public class HongbaodianOrderManager {
 		}
 		lowOrderIdMap.remove(orderId);
 		heighOrderIdMap.remove(orderId);
+		String payerId = orderIdPayerIdMap.remove(orderId);
+		payerIdLimitTimeMap.remove(payerId);
 		return orderId;
+	}
+
+	public long getPayerLimitTime(String payerId) {
+		long limitTime = 0;
+		limitTime = payerIdLimitTimeMap.get(payerId);
+		return limitTime;
 	}
 
 	public static int getSize() {

@@ -11,6 +11,7 @@ import org.springframework.cloud.stream.annotation.StreamListener;
 
 import com.anbang.qipai.hongbao.cqrs.c.domain.hongbaodianorder.OrderHasAlreadyExistenceException;
 import com.anbang.qipai.hongbao.cqrs.c.domain.hongbaodianorder.OrderNotFoundException;
+import com.anbang.qipai.hongbao.cqrs.c.domain.hongbaodianorder.TimeLimitException;
 import com.anbang.qipai.hongbao.cqrs.c.service.HongbaodianOrderCmdService;
 import com.anbang.qipai.hongbao.cqrs.q.dbo.RewardOrderDbo;
 import com.anbang.qipai.hongbao.cqrs.q.service.RewardOrderService;
@@ -54,7 +55,7 @@ public class HongbaoMsgReceiver {
 			// 创建订单
 			RewardOrderDbo order = rewardOrderService.createOrder(textSummary, amount, memberId);
 			try {
-				hongbaodianOrderCmdService.createOrder(order.getId());
+				hongbaodianOrderCmdService.createOrder(order.getId(), memberId, System.currentTimeMillis());
 				rewardOrderDboMsgService.recordRewardOrderDbo(order);
 				// 测试
 				Map<String, String> responseMap = new HashMap<>();
@@ -66,6 +67,9 @@ public class HongbaoMsgReceiver {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			} catch (OrderNotFoundException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (TimeLimitException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}

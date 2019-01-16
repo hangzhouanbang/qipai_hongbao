@@ -121,6 +121,35 @@ public class MemberController {
 	}
 
 	/**
+	 * 测试邀请
+	 */
+	@RequestMapping(value = "/memberbind")
+	public String member_bind(String memberId, String inviteMemberId) {
+		// 是否受老玩家邀请且未受过其他人邀请
+		if (!StringUtil.isBlank(inviteMemberId) && !StringUtil.isBlank(memberId) && memberInvitationRecordService
+				.findMemberInvitationRecordByInvitationMemberId(inviteMemberId) == null) {
+			MemberDbo member = memberAuthQueryService.findByMemberId(memberId);
+			if (member == null) {
+				return "";
+			}
+			MemberDbo invitateMember = memberAuthQueryService.findByMemberId(inviteMemberId);
+			// 邀请记录
+			MemberInvitationRecord record = new MemberInvitationRecord();
+			record.setMemberId(memberId);
+			record.setNickname(member.getNickname());
+			record.setInvitationMemberId(inviteMemberId);
+			if (invitateMember != null) {
+				// 如果未收到新玩家消息则不填昵称
+				record.setInvitationMemberNickname(invitateMember.getNickname());
+			}
+			record.setCreateTime(System.currentTimeMillis());
+			memberInvitationRecordService.insertMemberInvitationRecord(record);
+			memberInvitationRecordMsgService.newRecord(record);
+		}
+		return "redirect:http://scs.3cscy.com/majiang/u3D/html/xiazai.html";
+	}
+
+	/**
 	 * 查询邀请记录
 	 */
 	@RequestMapping("/queryinvitation")

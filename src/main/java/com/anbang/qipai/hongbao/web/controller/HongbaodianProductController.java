@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.anbang.qipai.hongbao.cqrs.c.domain.hongbaodianorder.OrderHasAlreadyExistenceException;
 import com.anbang.qipai.hongbao.cqrs.c.domain.hongbaodianorder.OrderNotFoundException;
+import com.anbang.qipai.hongbao.cqrs.c.domain.hongbaodianorder.TimeLimitException;
 import com.anbang.qipai.hongbao.cqrs.c.domain.member.MemberNotFoundException;
 import com.anbang.qipai.hongbao.cqrs.c.service.HongbaodianOrderCmdService;
 import com.anbang.qipai.hongbao.cqrs.c.service.MemberAuthService;
@@ -174,7 +175,7 @@ public class HongbaodianProductController {
 			// 创建订单
 			HongbaodianOrder order = hongbaodianOrderService.createOrder("buy" + product.getName(), productId, memberId,
 					memberId, reqIP);
-			hongbaodianOrderCmdService.createOrder(order.getId());
+			hongbaodianOrderCmdService.createOrder(order.getId(), memberId, System.currentTimeMillis());
 			hongbaodianOrderMsgService.recordHongbaodianOrder(order);
 			// 支付红包点
 			AccountingRecord record = memberHongbaodianCmdService.withdraw(memberId, price, "buy hongbaodianproduct",
@@ -206,6 +207,14 @@ public class HongbaodianProductController {
 		} catch (OrderNotFoundException e) {
 			vo.setSuccess(false);
 			vo.setMsg("OrderNotFoundException");
+			return vo;
+		} catch (TimeLimitException e) {
+			long limitTime = hongbaodianOrderCmdService.queryLimitTime(memberId);
+			vo.setSuccess(false);
+			vo.setMsg("TimeLimitException");
+			Map data = new HashMap<>();
+			data.put("remain", System.currentTimeMillis() - limitTime);
+			vo.setData(data);
 			return vo;
 		}
 		return vo;
