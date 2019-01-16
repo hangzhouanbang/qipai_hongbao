@@ -10,7 +10,6 @@ import com.anbang.qipai.hongbao.cqrs.q.dao.MemberHongbaodianRecordDboDao;
 import com.anbang.qipai.hongbao.cqrs.q.dbo.MemberHongbaodianAccountDbo;
 import com.anbang.qipai.hongbao.cqrs.q.dbo.MemberHongbaodianRecordDbo;
 import com.dml.accounting.AccountingRecord;
-import com.highto.framework.web.page.ListPage;
 
 @Service
 public class MemberHongbaodianService {
@@ -59,11 +58,21 @@ public class MemberHongbaodianService {
 	/**
 	 * 根据用户id查询红包点流水
 	 */
-	public ListPage findMemberHongbaodianRecordByMemberId(int page, int size, String memberId) {
-		long amount = memberHongbaodianRecordDboDao.countAmountByMemberId(memberId);
-		List<MemberHongbaodianRecordDbo> recordList = memberHongbaodianRecordDboDao.findByMemberId(page, size,
-				memberId);
-		ListPage listPage = new ListPage(recordList, page, size, (int) amount);
-		return listPage;
+	// public ListPage findMemberHongbaodianRecordByMemberId(int page, int size,
+	// String memberId) {
+	// long amount = memberHongbaodianRecordDboDao.countAmountByMemberId(memberId);
+	// List<MemberHongbaodianRecordDbo> recordList =
+	// memberHongbaodianRecordDboDao.findByMemberId(page, size,
+	// memberId);
+	// ListPage listPage = new ListPage(recordList, page, size, (int) amount);
+	// return listPage;
+	// }
+
+	/**
+	 * 根据用户id查询红包点流水
+	 */
+	public List<MemberHongbaodianRecordDbo> findMemberHongbaodianRecordByMemberId(String memberId) {
+		List<MemberHongbaodianRecordDbo> recordList = memberHongbaodianRecordDboDao.findByMemberId(memberId);
+		return recordList;
 	}
 }

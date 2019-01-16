@@ -42,7 +42,7 @@ public class RewardOrderService {
 				receiverId, "open.weixin.app.qipai");
 		order.setReceiverOpenId(receiverAuthDbo.getUuid());
 		order.setRewardRMB(rewardAmount);
-		order.setStatus("WAIT_BUYER_PAY");
+		order.setStatus("PROCESSING");
 		order.setCreateTime(System.currentTimeMillis());
 		order.setDesc(desc);
 		String spbill_create_ip = null;

@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.anbang.qipai.hongbao.cqrs.c.service.MemberAuthService;
+import com.anbang.qipai.hongbao.cqrs.q.dbo.MemberDbo;
 import com.anbang.qipai.hongbao.cqrs.q.service.MemberAuthQueryService;
 import com.anbang.qipai.hongbao.msg.service.MemberInvitationRecordMsgService;
 import com.anbang.qipai.hongbao.plan.bean.MemberInvitationRecord;
@@ -96,12 +97,21 @@ public class MemberController {
 			String memberId = memberAuthService.getMemberIdBySessionId((String) data.get("token"));
 			// 是否受老玩家邀请且未受过其他人邀请
 			if (!StringUtil.isBlank(memberId) && !StringUtil.isBlank(state)
-					&& memberAuthQueryService.findByMemberId(state) != null
 					&& memberInvitationRecordService.findMemberInvitationRecordByInvitationMemberId(memberId) == null) {
+				MemberDbo member = memberAuthQueryService.findByMemberId(state);
+				if (member == null) {
+					return "";
+				}
+				MemberDbo invitateMember = memberAuthQueryService.findByMemberId(memberId);
 				// 邀请记录
 				MemberInvitationRecord record = new MemberInvitationRecord();
 				record.setMemberId(state);
+				record.setNickname(member.getNickname());
 				record.setInvitationMemberId(memberId);
+				if (invitateMember != null) {
+					// 如果未收到新玩家消息则不填昵称
+					record.setInvitationMemberNickname(invitateMember.getNickname());
+				}
 				record.setCreateTime(System.currentTimeMillis());
 				memberInvitationRecordService.insertMemberInvitationRecord(record);
 				memberInvitationRecordMsgService.newRecord(record);
@@ -110,6 +120,9 @@ public class MemberController {
 		return "redirect:http://scs.3cscy.com/majiang/u3D/html/xiazai.html";
 	}
 
+	/**
+	 * 查询邀请记录
+	 */
 	@RequestMapping("/queryinvitation")
 	@ResponseBody
 	public CommonVO queryInvitationRecord(@RequestParam(defaultValue = "1") int page,

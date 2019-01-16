@@ -41,7 +41,7 @@ public class WXPayService {
 	private RequestConfig requestConfig;// 请求器的配置
 	private CloseableHttpClient httpClient;// HTTP请求器
 
-	public Map<String, String> rewardAgent(HongbaodianOrder order) throws Exception {
+	public Map<String, String> reward(HongbaodianOrder order) throws Exception {
 		String orderInfo = createRewardInfo(order);
 		SortedMap<String, String> responseMap = reward(orderInfo);
 		String queryInfo = createQueryRewardInfo(order);
@@ -49,7 +49,7 @@ public class WXPayService {
 		return responseMap;
 	}
 
-	public Map<String, String> rewardAgent(RewardOrderDbo order) throws Exception {
+	public Map<String, String> reward(RewardOrderDbo order) throws Exception {
 		String orderInfo = createRewardInfo(order);
 		SortedMap<String, String> responseMap = reward(orderInfo);
 		String queryInfo = createQueryRewardInfo(order);

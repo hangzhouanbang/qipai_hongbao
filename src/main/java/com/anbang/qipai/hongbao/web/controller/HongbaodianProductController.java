@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.anbang.qipai.hongbao.cqrs.c.domain.hongbaodianorder.OrderHasAlreadyExistenceException;
+import com.anbang.qipai.hongbao.cqrs.c.domain.hongbaodianorder.OrderNotFoundException;
 import com.anbang.qipai.hongbao.cqrs.c.domain.member.MemberNotFoundException;
 import com.anbang.qipai.hongbao.cqrs.c.service.HongbaodianOrderCmdService;
 import com.anbang.qipai.hongbao.cqrs.c.service.MemberAuthService;
@@ -22,7 +23,6 @@ import com.anbang.qipai.hongbao.cqrs.q.dbo.AuthorizationDbo;
 import com.anbang.qipai.hongbao.cqrs.q.dbo.HongbaodianOrder;
 import com.anbang.qipai.hongbao.cqrs.q.dbo.HongbaodianProduct;
 import com.anbang.qipai.hongbao.cqrs.q.dbo.MemberHongbaodianRecordDbo;
-import com.anbang.qipai.hongbao.cqrs.q.dbo.RewardType;
 import com.anbang.qipai.hongbao.cqrs.q.service.HongbaodianOrderService;
 import com.anbang.qipai.hongbao.cqrs.q.service.HongbaodianProductService;
 import com.anbang.qipai.hongbao.cqrs.q.service.MemberAuthQueryService;
@@ -126,6 +126,24 @@ public class HongbaodianProductController {
 	}
 
 	/**
+	 * 查询共兑换红包
+	 */
+	@RequestMapping("query_rewardnum")
+	public CommonVO queryRewardNum(String token) {
+		CommonVO vo = new CommonVO();
+		String memberId = memberAuthService.getMemberIdBySessionId(token);
+		if (memberId == null) {
+			vo.setSuccess(false);
+			vo.setMsg("invalid token");
+		}
+		double totalRewardNum = hongbaodianOrderService.countTotalRewardNumByReceiverId(memberId);
+		Map data = new HashMap<>();
+		vo.setData(data);
+		data.put("totalRewardNum", totalRewardNum);
+		return vo;
+	}
+
+	/**
 	 * 红包点兑换
 	 */
 	@RequestMapping("/buy_hongbaodianproduct")
@@ -164,9 +182,15 @@ public class HongbaodianProductController {
 			MemberHongbaodianRecordDbo dbo = memberHongbaodianService.withdraw(record, memberId);
 			hongbaodianRecordMsgService.newRecord(dbo);
 			// 返利
-			if (order.getRewardType().equals(RewardType.HONGBAORMB)) {// 现金返利
-				giveRewardRMBToMember(order, price);
-			}
+			// if (order.getRewardType().equals(RewardType.HONGBAORMB)) {// 现金返利
+			// giveRewardRMBToMember(order, price);
+			// }
+			// 测试
+			Map<String, String> responseMap = new HashMap<>();
+			responseMap.put("result", "test");
+			hongbaodianOrderCmdService.finishOrder(order.getId());
+			HongbaodianOrder finishOrder = hongbaodianOrderService.finishOrder(order, responseMap, "FINISH");
+			hongbaodianOrderMsgService.finishHongbaodianOrder(finishOrder);
 		} catch (MemberNotFoundException e) {
 			vo.setSuccess(false);
 			vo.setMsg("MemberNotFoundException");
@@ -179,25 +203,38 @@ public class HongbaodianProductController {
 			vo.setSuccess(false);
 			vo.setMsg("OrderHasAlreadyExistenceException");
 			return vo;
+		} catch (OrderNotFoundException e) {
+			vo.setSuccess(false);
+			vo.setMsg("OrderNotFoundException");
+			return vo;
 		}
 		return vo;
 	}
 
 	/**
 	 * 红包奖励
+	 * 
+	 * @throws Exception
 	 */
-	private void giveRewardRMBToMember(HongbaodianOrder order, int price) {
-		// 实际仍是单线程
-		executorService.submit(() -> {
-			try {
-				Map<String, String> responseMap = wxPayService.rewardAgent(order);
-				hongbaodianOrderCmdService.finishOrder(order.getId());
-				HongbaodianOrder finishOrder = hongbaodianOrderService.finishOrder(order, responseMap, "FINISH");
-				hongbaodianOrderMsgService.finishHongbaodianOrder(finishOrder);
-			} catch (Exception e) {
-				// 奖励失败时由后台客服补偿
-				e.printStackTrace();
+	private String giveRewardRMBToMember(HongbaodianOrder order, int price) throws Exception {
+		String reason = null;
+		String status = "FINISH";
+		Map<String, String> responseMap = wxPayService.reward(order);
+		String return_code = responseMap.get("return_code");
+		String return_msg = responseMap.get("return_msg");
+		reason = return_msg;
+		if ("SUCCESS".equals(return_code)) {
+			String result_code = responseMap.get("result_code");
+			String err_code_des = responseMap.get("err_code_des");
+			reason = err_code_des;
+			if ("SUCCESS".equals(result_code)) {
+				status = responseMap.get("status");
+				reason = responseMap.get("reason");
 			}
-		});
+		}
+		hongbaodianOrderCmdService.finishOrder(order.getId());
+		HongbaodianOrder finishOrder = hongbaodianOrderService.finishOrder(order, responseMap, status);
+		hongbaodianOrderMsgService.finishHongbaodianOrder(finishOrder);
+		return reason;
 	}
 }

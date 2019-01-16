@@ -13,4 +13,7 @@ public interface MemberHongbaodianRecordDboDao {
 	long countAmountByMemberId(String memberId);
 
 	List<MemberHongbaodianRecordDbo> findByMemberId(int page, int size, String memberId);
+
+	List<MemberHongbaodianRecordDbo> findByMemberId(String memberId);
+
 }

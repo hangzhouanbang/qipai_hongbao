@@ -11,4 +11,6 @@ public interface HongbaodianOrderDao {
 	void updateStatus(String orderId, String status);
 
 	void updateFinishTime(String orderId, long finishTime);
+
+	double countTotalRewardNumByReceiverId(String receiverId);
 }

@@ -70,7 +70,7 @@ public class HongbaodianOrderService {
 		} catch (Exception e) {
 		}
 		order.setReqIP(spbill_create_ip);
-		order.setStatus("WAIT_BUYER_PAY");
+		order.setStatus("PROCESSING");
 		order.setCreateTime(System.currentTimeMillis());
 		order.setDesc(desc);
 		hongbaodianOrderDao.insert(order);
@@ -95,5 +95,9 @@ public class HongbaodianOrderService {
 			payInfoDao.updateFinishTime(order.getId(), System.currentTimeMillis());
 		}
 		return hongbaodianOrderDao.findById(order.getId());
+	}
+
+	public double countTotalRewardNumByReceiverId(String receiverId) {
+		return hongbaodianOrderDao.countTotalRewardNumByReceiverId(receiverId);
 	}
 }

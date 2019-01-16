@@ -45,4 +45,11 @@ public class MongodbMemberHongbaodianRecordDboDao implements MemberHongbaodianRe
 		return mongoTemplate.find(query, MemberHongbaodianRecordDbo.class);
 	}
 
+	@Override
+	public List<MemberHongbaodianRecordDbo> findByMemberId(String memberId) {
+		Query query = new Query();
+		query.addCriteria(Criteria.where("memberId").is(memberId));
+		return mongoTemplate.find(query, MemberHongbaodianRecordDbo.class);
+	}
+
 }

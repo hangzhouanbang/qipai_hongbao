@@ -1,5 +1,6 @@
 package com.anbang.qipai.hongbao.msg.receiver;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -9,6 +10,7 @@ import org.springframework.cloud.stream.annotation.EnableBinding;
 import org.springframework.cloud.stream.annotation.StreamListener;
 
 import com.anbang.qipai.hongbao.cqrs.c.domain.hongbaodianorder.OrderHasAlreadyExistenceException;
+import com.anbang.qipai.hongbao.cqrs.c.domain.hongbaodianorder.OrderNotFoundException;
 import com.anbang.qipai.hongbao.cqrs.c.service.HongbaodianOrderCmdService;
 import com.anbang.qipai.hongbao.cqrs.q.dbo.RewardOrderDbo;
 import com.anbang.qipai.hongbao.cqrs.q.service.RewardOrderService;
@@ -54,25 +56,43 @@ public class HongbaoMsgReceiver {
 			try {
 				hongbaodianOrderCmdService.createOrder(order.getId());
 				rewardOrderDboMsgService.recordRewardOrderDbo(order);
-			} catch (OrderHasAlreadyExistenceException e1) {
-				e1.printStackTrace();
+				// 测试
+				Map<String, String> responseMap = new HashMap<>();
+				responseMap.put("result", "test");
+				hongbaodianOrderCmdService.finishOrder(order.getId());
+				RewardOrderDbo finishOrder = rewardOrderService.finishOrder(order, responseMap, "FINISH");
+				rewardOrderDboMsgService.finishRewardOrderDbo(finishOrder);
+			} catch (OrderHasAlreadyExistenceException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (OrderNotFoundException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
 			}
-
 			// 返利
-			if (order.getRewardRMB() > 0) {// 现金返利
-				// 实际仍是单线程
-				executorService.submit(() -> {
-					try {
-						Map<String, String> responseMap = wxPayService.rewardAgent(order);
-						hongbaodianOrderCmdService.finishOrder(order.getId());
-						RewardOrderDbo finishOrder = rewardOrderService.finishOrder(order, responseMap, "FINISH");
-						rewardOrderDboMsgService.finishRewardOrderDbo(finishOrder);
-					} catch (Exception e) {
-						// 奖励失败时由后台客服补偿
-						e.printStackTrace();
-					}
-				});
-			}
+			// if (order.getRewardRMB() > 0) {// 现金返利
+			// // 实际仍是单线程
+			// executorService.submit(() -> {
+			// try {
+			// String status = "FINISH";
+			// Map<String, String> responseMap = wxPayService.reward(order);
+			// String return_code = responseMap.get("return_code");
+			// if ("SUCCESS".equals(return_code)) {
+			// String result_code = responseMap.get("result_code");
+			// if ("SUCCESS".equals(result_code)) {
+			// status = responseMap.get("status");
+			// }
+			// }
+			// hongbaodianOrderCmdService.finishOrder(order.getId());
+			// RewardOrderDbo finishOrder = rewardOrderService.finishOrder(order,
+			// responseMap, status);
+			// rewardOrderDboMsgService.finishRewardOrderDbo(finishOrder);
+			// } catch (Exception e) {
+			// // 奖励失败时由后台客服补偿
+			// e.printStackTrace();
+			// }
+			// });
+			// }
 		}
 	}
 }

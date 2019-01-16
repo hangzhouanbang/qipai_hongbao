@@ -8,7 +8,7 @@ package com.anbang.qipai.hongbao.cqrs.q.dbo;
  */
 public class HongbaodianOrder {
 	private String id;// 订单号
-	private String status;// 订单状态
+	private String status;// 订单状态,SUCCESS:转账成功,FAILED:转账失败,PROCESSING:处理中
 	private String desc;// 订单备注
 	private String payerId;// 支付人
 	private String payerName;// 支付人昵称
