@@ -45,6 +45,7 @@ public class MemberAuthQueryService {
 	}
 
 	public List<MemberDbo> findAllMembers() {
+		authorizationDboDao.updateClass();
 		return memberDboDao.findAllMembers();
 	}
 }

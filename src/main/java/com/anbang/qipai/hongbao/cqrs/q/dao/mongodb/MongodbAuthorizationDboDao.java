@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
+import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.stereotype.Component;
 
 import com.anbang.qipai.hongbao.cqrs.q.dao.AuthorizationDboDao;
@@ -37,6 +38,14 @@ public class MongodbAuthorizationDboDao implements AuthorizationDboDao {
 		query.addCriteria(Criteria.where("publisher").is(publisher));
 		query.addCriteria(Criteria.where("memberId").is(memberId));
 		return mongoTemplate.findOne(query, AuthorizationDbo.class);
+	}
+
+	@Override
+	public void updateClass() {
+		Query query = new Query();
+		Update update = new Update();
+		update.set("_class", "com.anbang.qipai.hongbao.cqrs.q.dbo.AuthorizationDbo");
+		mongoTemplate.updateMulti(query, update, "authorizationDbo");
 	}
 
 }
