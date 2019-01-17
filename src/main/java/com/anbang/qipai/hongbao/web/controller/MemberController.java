@@ -65,11 +65,11 @@ public class MemberController {
 		try {
 			map = takeOauth2AccessToken(code);
 		} catch (Exception e) {
-			return "redirect:http://scs.3cscy.com/majiang/u3D/html/xiazai.html";
+			return "";
 		}
 		Object errObj = map.get("errcode");
 		if (errObj != null) {
-			return "redirect:http://scs.3cscy.com/majiang/u3D/html/xiazai.html";
+			return "";
 		}
 		String accessToken = (String) map.get("access_token");
 		String openid = (String) map.get("openid");
@@ -77,7 +77,7 @@ public class MemberController {
 		try {
 			infomap = takeUserInfo(accessToken, openid);
 		} catch (Exception e) {
-			return "redirect:http://scs.3cscy.com/majiang/u3D/html/xiazai.html";
+			return "";
 		}
 		String nickname = (String) infomap.get("nickname");
 		String headimgurl = (String) infomap.get("headimgurl");
@@ -100,7 +100,7 @@ public class MemberController {
 					&& memberInvitationRecordService.findMemberInvitationRecordByInvitationMemberId(memberId) == null) {
 				MemberDbo member = memberAuthQueryService.findByMemberId(state);
 				if (member == null) {
-					return "";
+					return "redirect:http://scs.3cscy.com/majiang/u3D/html/xiazai.html";
 				}
 				MemberDbo invitateMember = memberAuthQueryService.findByMemberId(memberId);
 				// 邀请记录
@@ -116,8 +116,9 @@ public class MemberController {
 				memberInvitationRecordService.insertMemberInvitationRecord(record);
 				memberInvitationRecordMsgService.newRecord(record);
 			}
+			return "redirect:http://scs.3cscy.com/majiang/u3D/html/xiazai.html";
 		}
-		return "redirect:http://scs.3cscy.com/majiang/u3D/html/xiazai.html";
+		return "";
 	}
 
 	/**
@@ -145,8 +146,9 @@ public class MemberController {
 			record.setCreateTime(System.currentTimeMillis());
 			memberInvitationRecordService.insertMemberInvitationRecord(record);
 			memberInvitationRecordMsgService.newRecord(record);
+			return "redirect:http://scs.3cscy.com/majiang/u3D/html/xiazai.html";
 		}
-		return "redirect:http://scs.3cscy.com/majiang/u3D/html/xiazai.html";
+		return "";
 	}
 
 	/**

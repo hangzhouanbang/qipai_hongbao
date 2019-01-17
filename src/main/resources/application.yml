@@ -63,6 +63,16 @@ spring:
                   ms: 5
                 batch:
                   size: 16384
+          whitelist:
+            producer:
+              configuration:
+                request:
+                  timeout:
+                    ms: 30000
+                linger:
+                  ms: 5
+                batch:
+                  size: 16384
                   
       bindings:
         memberHongbaodianRecord:
@@ -87,6 +97,11 @@ spring:
             partitionCount: 1
         rewardOrderDbo:
           destination: rewardOrderDbo
+          contentType: application/json
+          producer:
+            partitionCount: 1
+        whitelist:
+          destination: whitelist
           contentType: application/json
           producer:
             partitionCount: 1
@@ -118,7 +133,13 @@ spring:
             concurrency: 1
             partitioned: false
           contentType: application/json
-            
+        memberLoginRecord:
+          destination: memberLoginRecord
+          group: qipai-hongbao
+          consumer:
+            concurrency: 1
+            partitioned: false
+          contentType: application/json
   application:
     name: qipai-hongbao
 server:

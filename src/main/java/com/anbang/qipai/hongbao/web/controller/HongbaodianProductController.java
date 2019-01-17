@@ -2,17 +2,18 @@ package com.anbang.qipai.hongbao.web.controller;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 import javax.servlet.http.HttpServletRequest;
 
+import org.apache.http.HttpResponse;
+import org.apache.http.util.EntityUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.anbang.qipai.hongbao.conf.IPVerifyConfig;
 import com.anbang.qipai.hongbao.cqrs.c.domain.hongbaodianorder.OrderHasAlreadyExistenceException;
 import com.anbang.qipai.hongbao.cqrs.c.domain.hongbaodianorder.OrderNotFoundException;
 import com.anbang.qipai.hongbao.cqrs.c.domain.hongbaodianorder.TimeLimitException;
@@ -31,11 +32,16 @@ import com.anbang.qipai.hongbao.cqrs.q.service.MemberHongbaodianService;
 import com.anbang.qipai.hongbao.msg.service.HongbaodianOrderMsgService;
 import com.anbang.qipai.hongbao.msg.service.HongbaodianProductMsgService;
 import com.anbang.qipai.hongbao.msg.service.HongbaodianRecordMsgService;
+import com.anbang.qipai.hongbao.plan.bean.WhiteList;
+import com.anbang.qipai.hongbao.plan.service.MemberLoginRecordService;
 import com.anbang.qipai.hongbao.plan.service.WXPayService;
+import com.anbang.qipai.hongbao.plan.service.WhiteListService;
+import com.anbang.qipai.hongbao.util.HttpUtil;
 import com.anbang.qipai.hongbao.util.IPUtil;
 import com.anbang.qipai.hongbao.web.vo.CommonVO;
 import com.dml.accounting.AccountingRecord;
 import com.dml.accounting.InsufficientBalanceException;
+import com.google.gson.Gson;
 import com.highto.framework.web.page.ListPage;
 
 @RestController
@@ -61,6 +67,12 @@ public class HongbaodianProductController {
 	private MemberHongbaodianService memberHongbaodianService;
 
 	@Autowired
+	private MemberLoginRecordService memberLoginRecordService;
+
+	@Autowired
+	private WhiteListService whiteListService;
+
+	@Autowired
 	private MemberHongbaodianCmdService memberHongbaodianCmdService;
 
 	@Autowired
@@ -75,7 +87,7 @@ public class HongbaodianProductController {
 	@Autowired
 	private HongbaodianOrderMsgService hongbaodianOrderMsgService;
 
-	private ExecutorService executorService = Executors.newCachedThreadPool();
+	private Gson gson = new Gson();
 
 	/**
 	 * 添加红包点商品
@@ -171,6 +183,12 @@ public class HongbaodianProductController {
 			return vo;
 		}
 		String reqIP = IPUtil.getRealIp(request);
+		WhiteList whitelist = whiteListService.findByPlayerIdAndLoginIP(memberId, reqIP);
+		if (whitelist == null && !verifyReqIP(reqIP)) {// ip不在白名单并且无效
+			vo.setSuccess(false);
+			vo.setMsg("invalid ip");
+			return vo;
+		}
 		try {
 			// 创建订单
 			HongbaodianOrder order = hongbaodianOrderService.createOrder("buy" + product.getName(), productId, memberId,
@@ -184,7 +202,7 @@ public class HongbaodianProductController {
 			hongbaodianRecordMsgService.newRecord(dbo);
 			// 返利
 			// if (order.getRewardType().equals(RewardType.HONGBAORMB)) {// 现金返利
-			// giveRewardRMBToMember(order, price);
+			// giveRewardRMBToMember(order);
 			// }
 			// 测试
 			Map<String, String> responseMap = new HashMap<>();
@@ -210,11 +228,11 @@ public class HongbaodianProductController {
 			return vo;
 		} catch (TimeLimitException e) {
 			long limitTime = hongbaodianOrderCmdService.queryLimitTime(memberId);
-			vo.setSuccess(false);
-			vo.setMsg("TimeLimitException");
 			Map data = new HashMap<>();
 			data.put("remain", System.currentTimeMillis() - limitTime);
 			vo.setData(data);
+			vo.setSuccess(false);
+			vo.setMsg("TimeLimitException");
 			return vo;
 		}
 		return vo;
@@ -222,10 +240,8 @@ public class HongbaodianProductController {
 
 	/**
 	 * 红包奖励
-	 * 
-	 * @throws Exception
 	 */
-	private String giveRewardRMBToMember(HongbaodianOrder order, int price) throws Exception {
+	private String giveRewardRMBToMember(HongbaodianOrder order) throws Exception {
 		String reason = null;
 		String status = "FINISH";
 		Map<String, String> responseMap = wxPayService.reward(order);
@@ -245,5 +261,38 @@ public class HongbaodianProductController {
 		HongbaodianOrder finishOrder = hongbaodianOrderService.finishOrder(order, responseMap, status);
 		hongbaodianOrderMsgService.finishHongbaodianOrder(finishOrder);
 		return reason;
+	}
+
+	/**
+	 * 验证ip
+	 */
+	private boolean verifyReqIP(String reqIP) {
+		int num = memberLoginRecordService.countMemberNumByLoginIp(reqIP);
+		if (num > 4) {// 有4个以上的账号用该IP做登录
+			return false;
+		}
+		String host = "https://ali-ip.showapi.com";
+		String path = "/ip";
+		String method = "GET";
+		String appcode = IPVerifyConfig.APPCODE;
+		Map<String, String> headers = new HashMap<String, String>();
+		// 最后在header中的格式(中间是英文空格)为Authorization:APPCODE 83359fd73fe94948385f570e3c139105
+		headers.put("Authorization", "APPCODE " + appcode);
+		Map<String, String> querys = new HashMap<String, String>();
+		querys.put("ip", reqIP);
+
+		try {
+			HttpResponse response = HttpUtil.doGet(host, path, method, headers, querys);
+			Map map = gson.fromJson(EntityUtils.toString(response.getEntity()), Map.class);
+			String showapi_res_body = (String) map.get("showapi_res_body");
+			Map data = gson.fromJson(showapi_res_body, Map.class);
+			String city = (String) data.get("city");
+			if (city.equals("温州")) {
+				return true;
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return false;
 	}
 }
