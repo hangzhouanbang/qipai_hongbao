@@ -24,7 +24,7 @@ public class WhiteListService {
 		whiteListDao.remove(ids);
 	}
 
-	public WhiteList findByPlayerIdAndLoginIP(String playerId, String loginIP) {
-		return whiteListDao.findByPlayerIdAndLoginIP(playerId, loginIP);
+	public WhiteList findByPlayerId(String playerId) {
+		return whiteListDao.findByPlayerId(playerId);
 	}
 }

@@ -157,7 +157,7 @@ public class MemberController {
 	@RequestMapping("/queryinvitation")
 	@ResponseBody
 	public CommonVO queryInvitationRecord(@RequestParam(defaultValue = "1") int page,
-			@RequestParam(defaultValue = "10") int size, String token) {
+			@RequestParam(defaultValue = "30") int size, String token) {
 		CommonVO vo = new CommonVO();
 		String memberId = memberAuthService.getMemberIdBySessionId(token);
 		if (memberId == null) {

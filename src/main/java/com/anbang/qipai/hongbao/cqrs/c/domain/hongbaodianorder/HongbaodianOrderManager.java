@@ -19,7 +19,7 @@ public class HongbaodianOrderManager {
 		if (lowOrderIdMap.containsKey(orderId) || heighOrderIdMap.containsKey(orderId)) {
 			throw new OrderHasAlreadyExistenceException();
 		}
-		if (payerIdLimitTimeMap.get(payerId) > currentTime) {
+		if (payerIdLimitTimeMap.get(payerId) != null && payerIdLimitTimeMap.get(payerId) > currentTime) {
 			throw new TimeLimitException();
 		}
 		// 将订单号保存在两个map缓存

@@ -141,7 +141,7 @@ public class HongbaodianProductController {
 	/**
 	 * 查询共兑换红包
 	 */
-	@RequestMapping("query_rewardnum")
+	@RequestMapping("/query_rewardnum")
 	public CommonVO queryRewardNum(String token) {
 		CommonVO vo = new CommonVO();
 		String memberId = memberAuthService.getMemberIdBySessionId(token);
@@ -183,7 +183,7 @@ public class HongbaodianProductController {
 			return vo;
 		}
 		String reqIP = IPUtil.getRealIp(request);
-		WhiteList whitelist = whiteListService.findByPlayerIdAndLoginIP(memberId, reqIP);
+		WhiteList whitelist = whiteListService.findByPlayerId(memberId);
 		if (whitelist == null && !verifyReqIP(reqIP)) {// ip不在白名单并且无效
 			vo.setSuccess(false);
 			vo.setMsg("invalid ip");
@@ -202,7 +202,12 @@ public class HongbaodianProductController {
 			hongbaodianRecordMsgService.newRecord(dbo);
 			// 返利
 			// if (order.getRewardType().equals(RewardType.HONGBAORMB)) {// 现金返利
-			// giveRewardRMBToMember(order);
+			// String reason=giveRewardRMBToMember(order);
+			// if(!StringUtil.isBlank(reason)) {
+			// vo.setSuccess(false);
+			// vo.setMsg(reason);
+			// return vo;
+			// }
 			// }
 			// 测试
 			Map<String, String> responseMap = new HashMap<>();

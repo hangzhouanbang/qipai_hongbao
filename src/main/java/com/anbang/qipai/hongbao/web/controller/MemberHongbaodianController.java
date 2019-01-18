@@ -57,7 +57,10 @@ public class MemberHongbaodianController {
 		MemberHongbaodianAccountDbo account = memberHongbaodianService.findAccountByMemberId(memberId);
 		Map data = new HashMap<>();
 		vo.setData(data);
-		data.put("hongbaodian", account.getBalance());
+		data.put("hongbaodian", 0);
+		if (account != null) {
+			data.put("hongbaodian", account.getBalance());
+		}
 		return vo;
 	}
 
@@ -153,14 +156,14 @@ public class MemberHongbaodianController {
 	public CommonVO createAccount() {
 		CommonVO vo = new CommonVO();
 		List<MemberDbo> memberList = memberAuthQueryService.findAllMembers();
-		try {
-			for (MemberDbo member : memberList) {
+		for (MemberDbo member : memberList) {
+			try {
 				CreateHongbaodianAccountResult result = memberHongbaodianCmdService
 						.createHongbaodianAccountForNewMember(member.getId());
 				memberHongbaodianService.createHongbaodianAccountForNewMember(result.getAccountId(), member.getId());
+			} catch (MemberHasHongbaodianAccountAlreadyException e) {
+
 			}
-		} catch (MemberHasHongbaodianAccountAlreadyException e) {
-			e.printStackTrace();
 		}
 		return vo;
 	}

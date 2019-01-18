@@ -10,5 +10,5 @@ public interface WhiteListDao {
 
 	void remove(String[] ids);
 
-	WhiteList findByPlayerIdAndLoginIP(String playerId, String loginIP);
+	WhiteList findByPlayerId(String playerId);
 }

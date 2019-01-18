@@ -4,8 +4,8 @@ import org.springframework.cloud.stream.annotation.Input;
 import org.springframework.messaging.SubscribableChannel;
 
 public interface HongbaodianAccountingSink {
-	String HONGBAODIANACCOUNTING = "hongbaodianaccounting";
+	String MEMBERHONGBAODIANACCOUNTING = "memberHongbaodianAccounting";
 
 	@Input
-	SubscribableChannel hongbaodianaccounting();
+	SubscribableChannel memberHongbaodianAccounting();
 }

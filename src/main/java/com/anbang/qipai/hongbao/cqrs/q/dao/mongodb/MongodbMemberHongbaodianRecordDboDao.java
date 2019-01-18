@@ -3,6 +3,8 @@ package com.anbang.qipai.hongbao.cqrs.q.dao.mongodb;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Sort.Direction;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
@@ -42,6 +44,7 @@ public class MongodbMemberHongbaodianRecordDboDao implements MemberHongbaodianRe
 		query.addCriteria(Criteria.where("memberId").is(memberId));
 		query.skip((page - 1) * size);
 		query.limit(size);
+		query.with(new Sort(Direction.DESC, "accountingTime"));
 		return mongoTemplate.find(query, MemberHongbaodianRecordDbo.class);
 	}
 
@@ -49,6 +52,7 @@ public class MongodbMemberHongbaodianRecordDboDao implements MemberHongbaodianRe
 	public List<MemberHongbaodianRecordDbo> findByMemberId(String memberId) {
 		Query query = new Query();
 		query.addCriteria(Criteria.where("memberId").is(memberId));
+		query.with(new Sort(Direction.DESC, "accountingTime"));
 		return mongoTemplate.find(query, MemberHongbaodianRecordDbo.class);
 	}
 

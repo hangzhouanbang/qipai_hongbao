@@ -31,7 +31,7 @@ public class HongbaodianAccountingMsgReceiver {
 
 	private Gson gson = new Gson();
 
-	@StreamListener(HongbaodianAccountingSink.HONGBAODIANACCOUNTING)
+	@StreamListener(HongbaodianAccountingSink.MEMBERHONGBAODIANACCOUNTING)
 	public void recordMembers(CommonMO mo) {
 		String msg = mo.getMsg();
 		String json = gson.toJson(mo.getData());
@@ -39,7 +39,7 @@ public class HongbaodianAccountingMsgReceiver {
 			Map data = gson.fromJson(json, Map.class);
 			String memberId = (String) data.get("memberId");
 			int amount = ((Double) data.get("amount")).intValue();
-			String summary = (String) data.get("summary");
+			String summary = (String) data.get("textSummary");
 			try {
 				AccountingRecord ar = memberHongbaodianCmdService.giveHongbaodianToMember(memberId, amount, summary,
 						System.currentTimeMillis());
@@ -53,7 +53,7 @@ public class HongbaodianAccountingMsgReceiver {
 			Map data = gson.fromJson(json, Map.class);
 			String memberId = (String) data.get("memberId");
 			int amount = ((Double) data.get("amount")).intValue();
-			String summary = (String) data.get("summary");
+			String summary = (String) data.get("textSummary");
 			try {
 				AccountingRecord ar = memberHongbaodianCmdService.withdraw(memberId, amount, summary,
 						System.currentTimeMillis());

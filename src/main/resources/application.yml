@@ -126,8 +126,8 @@ spring:
             concurrency: 1
             partitioned: false
           contentType: application/json
-        hongbaodianaccounting:
-          destination: hongbaodianaccounting
+        memberHongbaodianAccounting:
+          destination: memberHongbaodianAccounting
           group: qipai-hongbao
           consumer:
             concurrency: 1

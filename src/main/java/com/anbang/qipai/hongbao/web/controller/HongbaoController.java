@@ -67,7 +67,7 @@ public class HongbaoController {
 			vo.setMsg("invalid openid");
 			return vo;
 		}
-		WhiteList whitelist = whiteListService.findByPlayerIdAndLoginIP(memberId, reqIP);
+		WhiteList whitelist = whiteListService.findByPlayerId(memberId);
 		if (whitelist == null && !verifyReqIP(reqIP)) {// ip不在白名单并且无效
 			vo.setSuccess(false);
 			vo.setMsg("invalid ip");
@@ -78,6 +78,15 @@ public class HongbaoController {
 		try {
 			hongbaodianOrderCmdService.createOrder(order.getId(), memberId, System.currentTimeMillis());
 			rewardOrderDboMsgService.recordRewardOrderDbo(order);
+			// 返利
+			// if (order.getRewardType().equals(RewardType.HONGBAORMB)) {// 现金返利
+			// String reason=giveRewardRMBToMember(order);
+			// if(!StringUtil.isBlank(reason)) {
+			// vo.setSuccess(false);
+			// vo.setMsg(reason);
+			// return vo;
+			// }
+			// }
 			// 测试
 			Map<String, String> responseMap = new HashMap<>();
 			responseMap.put("result", "test");

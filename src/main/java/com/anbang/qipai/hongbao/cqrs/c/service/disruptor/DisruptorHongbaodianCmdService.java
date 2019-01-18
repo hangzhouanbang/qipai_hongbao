@@ -33,7 +33,11 @@ public class DisruptorHongbaodianCmdService extends DisruptorCmdServiceBase impl
 		try {
 			return result.getResult();
 		} catch (Exception e) {
-			throw new RuntimeException(e);
+			if (e instanceof MemberHasHongbaodianAccountAlreadyException) {
+				throw (MemberHasHongbaodianAccountAlreadyException) e;
+			} else {
+				throw new RuntimeException(e);
+			}
 		}
 	}
 
@@ -50,7 +54,11 @@ public class DisruptorHongbaodianCmdService extends DisruptorCmdServiceBase impl
 		try {
 			return result.getResult();
 		} catch (Exception e) {
-			throw new RuntimeException(e);
+			if (e instanceof MemberNotFoundException) {
+				throw (MemberNotFoundException) e;
+			} else {
+				throw new RuntimeException(e);
+			}
 		}
 	}
 
@@ -67,7 +75,13 @@ public class DisruptorHongbaodianCmdService extends DisruptorCmdServiceBase impl
 		try {
 			return result.getResult();
 		} catch (Exception e) {
-			throw new RuntimeException(e);
+			if (e instanceof MemberNotFoundException) {
+				throw (MemberNotFoundException) e;
+			} else if (e instanceof InsufficientBalanceException) {
+				throw (InsufficientBalanceException) e;
+			} else {
+				throw new RuntimeException(e);
+			}
 		}
 	}
 
