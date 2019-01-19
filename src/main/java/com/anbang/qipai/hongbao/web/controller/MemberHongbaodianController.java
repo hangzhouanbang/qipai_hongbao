@@ -100,7 +100,7 @@ public class MemberHongbaodianController {
 			return vo;
 		}
 		List<MemberHongbaodianRecordDbo> recordList = memberHongbaodianService
-				.findMemberHongbaodianRecordByMemberId(memberId);
+				.findMemberHongbaodianRecordByMemberIdAndSummary(memberId, "buy");
 		Map data = new HashMap<>();
 		vo.setData(data);
 		data.put("recordList", recordList);

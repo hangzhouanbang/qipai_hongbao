@@ -75,4 +75,14 @@ public class MemberHongbaodianService {
 		List<MemberHongbaodianRecordDbo> recordList = memberHongbaodianRecordDboDao.findByMemberId(memberId);
 		return recordList;
 	}
+
+	/**
+	 * 根据用户id和摘要查询红包点流水
+	 */
+	public List<MemberHongbaodianRecordDbo> findMemberHongbaodianRecordByMemberIdAndSummary(String memberId,
+			String summary) {
+		List<MemberHongbaodianRecordDbo> recordList = memberHongbaodianRecordDboDao.findByMemberIdAndSummary(memberId,
+				summary);
+		return recordList;
+	}
 }

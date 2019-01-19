@@ -55,7 +55,9 @@ public class HongbaodianOrderManager {
 
 	public long getPayerLimitTime(String payerId) {
 		long limitTime = 0;
-		limitTime = payerIdLimitTimeMap.get(payerId);
+		if (payerIdLimitTimeMap.get(payerId) != null) {
+			limitTime = payerIdLimitTimeMap.get(payerId);
+		}
 		return limitTime;
 	}
 

@@ -196,7 +196,7 @@ public class HongbaodianProductController {
 			hongbaodianOrderCmdService.createOrder(order.getId(), memberId, System.currentTimeMillis());
 			hongbaodianOrderMsgService.recordHongbaodianOrder(order);
 			// 支付红包点
-			AccountingRecord record = memberHongbaodianCmdService.withdraw(memberId, price, "buy hongbaodianproduct",
+			AccountingRecord record = memberHongbaodianCmdService.withdraw(memberId, price, "buy" + product.getName(),
 					System.currentTimeMillis());
 			MemberHongbaodianRecordDbo dbo = memberHongbaodianService.withdraw(record, memberId);
 			hongbaodianRecordMsgService.newRecord(dbo);

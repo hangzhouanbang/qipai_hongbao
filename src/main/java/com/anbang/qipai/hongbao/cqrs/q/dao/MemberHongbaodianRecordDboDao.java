@@ -16,4 +16,6 @@ public interface MemberHongbaodianRecordDboDao {
 
 	List<MemberHongbaodianRecordDbo> findByMemberId(String memberId);
 
+	List<MemberHongbaodianRecordDbo> findByMemberIdAndSummary(String memberId, String summary);
+
 }
