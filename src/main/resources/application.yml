@@ -140,6 +140,13 @@ spring:
             concurrency: 1
             partitioned: false
           contentType: application/json
+        memberLoginLimitRecord:
+          destination: memberLoginLimitRecord
+          group: qipai-hongbao
+          consumer:
+            concurrency: 1
+            partitioned: false
+          contentType: application/json
   application:
     name: qipai-hongbao
 server:

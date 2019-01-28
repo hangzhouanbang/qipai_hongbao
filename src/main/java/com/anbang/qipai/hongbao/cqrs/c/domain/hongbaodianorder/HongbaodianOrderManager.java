@@ -48,8 +48,7 @@ public class HongbaodianOrderManager {
 		}
 		lowOrderIdMap.remove(orderId);
 		heighOrderIdMap.remove(orderId);
-		String payerId = orderIdPayerIdMap.remove(orderId);
-		payerIdLimitTimeMap.remove(payerId);
+		orderIdPayerIdMap.remove(orderId);
 		return orderId;
 	}
 

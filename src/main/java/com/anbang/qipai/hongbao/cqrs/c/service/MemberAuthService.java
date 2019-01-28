@@ -30,7 +30,9 @@ public class MemberAuthService {
 			}
 		}
 		return memberId;
-
 	}
 
+	public void removeSessionByMemberId(String memberId) {
+		userSessionsManager.removeSessionsForUser(memberId);
+	}
 }

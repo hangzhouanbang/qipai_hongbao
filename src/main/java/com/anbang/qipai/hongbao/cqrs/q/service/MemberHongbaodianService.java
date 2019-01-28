@@ -9,7 +9,9 @@ import com.anbang.qipai.hongbao.cqrs.q.dao.MemberHongbaodianAccountDboDao;
 import com.anbang.qipai.hongbao.cqrs.q.dao.MemberHongbaodianRecordDboDao;
 import com.anbang.qipai.hongbao.cqrs.q.dbo.MemberHongbaodianAccountDbo;
 import com.anbang.qipai.hongbao.cqrs.q.dbo.MemberHongbaodianRecordDbo;
+import com.anbang.qipai.hongbao.web.vo.RecordSummaryTexts;
 import com.dml.accounting.AccountingRecord;
+import com.dml.accounting.TextAccountingSummary;
 
 @Service
 public class MemberHongbaodianService {
@@ -83,6 +85,12 @@ public class MemberHongbaodianService {
 			String summary) {
 		List<MemberHongbaodianRecordDbo> recordList = memberHongbaodianRecordDboDao.findByMemberIdAndSummary(memberId,
 				summary);
+		for (int i = 0; i < recordList.size(); i++) {
+			TextAccountingSummary textSummary = (TextAccountingSummary) recordList.get(i).getSummary();
+			TextAccountingSummary newSummary = new TextAccountingSummary(
+					RecordSummaryTexts.getSummaryText(textSummary.getText()));
+			recordList.get(i).setSummary(newSummary);
+		}
 		return recordList;
 	}
 }

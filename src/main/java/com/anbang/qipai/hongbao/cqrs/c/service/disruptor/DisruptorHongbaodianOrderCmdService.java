@@ -32,6 +32,8 @@ public class DisruptorHongbaodianOrderCmdService extends DisruptorCmdServiceBase
 		} catch (Exception e) {
 			if (e instanceof OrderHasAlreadyExistenceException) {
 				throw (OrderHasAlreadyExistenceException) e;
+			} else if (e instanceof TimeLimitException) {
+				throw (TimeLimitException) e;
 			} else {
 				throw new RuntimeException(e);
 			}

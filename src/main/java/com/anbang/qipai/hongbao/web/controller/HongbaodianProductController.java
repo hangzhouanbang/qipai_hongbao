@@ -32,7 +32,9 @@ import com.anbang.qipai.hongbao.cqrs.q.service.MemberHongbaodianService;
 import com.anbang.qipai.hongbao.msg.service.HongbaodianOrderMsgService;
 import com.anbang.qipai.hongbao.msg.service.HongbaodianProductMsgService;
 import com.anbang.qipai.hongbao.msg.service.HongbaodianRecordMsgService;
+import com.anbang.qipai.hongbao.plan.bean.MemberLoginLimitRecord;
 import com.anbang.qipai.hongbao.plan.bean.WhiteList;
+import com.anbang.qipai.hongbao.plan.service.MemberLoginLimitRecordService;
 import com.anbang.qipai.hongbao.plan.service.MemberLoginRecordService;
 import com.anbang.qipai.hongbao.plan.service.WXPayService;
 import com.anbang.qipai.hongbao.plan.service.WhiteListService;
@@ -86,6 +88,9 @@ public class HongbaodianProductController {
 
 	@Autowired
 	private HongbaodianOrderMsgService hongbaodianOrderMsgService;
+
+	@Autowired
+	private MemberLoginLimitRecordService memberLoginLimitRecordService;
 
 	private Gson gson = new Gson();
 
@@ -166,6 +171,12 @@ public class HongbaodianProductController {
 		if (memberId == null) {
 			vo.setSuccess(false);
 			vo.setMsg("invalid token");
+			return vo;
+		}
+		MemberLoginLimitRecord loginLimitRecord = memberLoginLimitRecordService.findByMemberId(memberId, true);
+		if (loginLimitRecord != null) {
+			vo.setSuccess(false);
+			vo.setMsg("login limited");
 			return vo;
 		}
 		HongbaodianProduct product = hongbaodianProductService.findHongbaodianProductByProductId(productId);

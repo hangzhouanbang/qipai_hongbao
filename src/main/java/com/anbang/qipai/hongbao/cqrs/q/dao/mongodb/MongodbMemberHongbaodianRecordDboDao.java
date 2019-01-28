@@ -60,7 +60,7 @@ public class MongodbMemberHongbaodianRecordDboDao implements MemberHongbaodianRe
 	public List<MemberHongbaodianRecordDbo> findByMemberIdAndSummary(String memberId, String summary) {
 		Query query = new Query();
 		query.addCriteria(Criteria.where("memberId").is(memberId));
-		query.addCriteria(Criteria.where("summaty.text").regex(summary));
+		query.addCriteria(Criteria.where("summary.text").regex(summary));
 		query.with(new Sort(Direction.DESC, "accountingTime"));
 		return mongoTemplate.find(query, MemberHongbaodianRecordDbo.class);
 	}
