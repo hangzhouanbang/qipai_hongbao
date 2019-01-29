@@ -5,13 +5,13 @@ import java.util.Map;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.util.EntityUtils;
-import org.eclipse.jetty.util.StringUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.anbang.qipai.hongbao.conf.IPVerifyConfig;
 import com.anbang.qipai.hongbao.cqrs.c.domain.hongbaodianorder.OrderHasAlreadyExistenceException;
+import com.anbang.qipai.hongbao.cqrs.c.domain.hongbaodianorder.OrderNotFoundException;
 import com.anbang.qipai.hongbao.cqrs.c.domain.hongbaodianorder.TimeLimitException;
 import com.anbang.qipai.hongbao.cqrs.c.service.HongbaodianOrderCmdService;
 import com.anbang.qipai.hongbao.cqrs.q.dbo.AuthorizationDbo;
@@ -79,25 +79,24 @@ public class HongbaoController {
 			hongbaodianOrderCmdService.createOrder(order.getId(), memberId, System.currentTimeMillis());
 			rewardOrderDboMsgService.recordRewardOrderDbo(order);
 			// 返利
-			try {
-				String reason = giveRewardRMBToMember(order);
-				if (!StringUtil.isBlank(reason)) {
-					vo.setSuccess(false);
-					vo.setMsg(reason);
-					return vo;
-				}
-			} catch (Exception e) {
-				vo.setSuccess(false);
-				vo.setMsg(e.getClass().getName());
-				return vo;
-			}
+			// try {
+			// String reason = giveRewardRMBToMember(order);
+			// if (!StringUtil.isBlank(reason)) {
+			// vo.setSuccess(false);
+			// vo.setMsg(reason);
+			// return vo;
+			// }
+			// } catch (Exception e) {
+			// vo.setSuccess(false);
+			// vo.setMsg(e.getClass().getName());
+			// return vo;
+			// }
 			// 测试
-			// Map<String, String> responseMap = new HashMap<>();
-			// responseMap.put("result", "test");
-			// hongbaodianOrderCmdService.finishOrder(order.getId());
-			// RewardOrderDbo finishOrder = rewardOrderService.finishOrder(order,
-			// responseMap, "FINISH");
-			// rewardOrderDboMsgService.finishRewardOrderDbo(finishOrder);
+			Map<String, String> responseMap = new HashMap<>();
+			responseMap.put("result", "test");
+			hongbaodianOrderCmdService.finishOrder(order.getId());
+			RewardOrderDbo finishOrder = rewardOrderService.finishOrder(order, responseMap, "FINISH");
+			rewardOrderDboMsgService.finishRewardOrderDbo(finishOrder);
 		} catch (OrderHasAlreadyExistenceException e) {
 			vo.setSuccess(false);
 			vo.setMsg("OrderHasAlreadyExistenceException");
@@ -108,6 +107,10 @@ public class HongbaoController {
 			data.put("remain", System.currentTimeMillis() - limitTime);
 			vo.setSuccess(false);
 			vo.setMsg("TimeLimitException");
+			return vo;
+		} catch (OrderNotFoundException e) {
+			vo.setSuccess(false);
+			vo.setMsg("OrderNotFoundException");
 			return vo;
 		}
 		return vo;

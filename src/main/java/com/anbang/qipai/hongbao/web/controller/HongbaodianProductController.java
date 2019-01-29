@@ -7,7 +7,6 @@ import javax.servlet.http.HttpServletRequest;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.util.EntityUtils;
-import org.eclipse.jetty.util.StringUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -16,6 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.anbang.qipai.hongbao.conf.IPVerifyConfig;
 import com.anbang.qipai.hongbao.cqrs.c.domain.hongbaodianorder.OrderHasAlreadyExistenceException;
+import com.anbang.qipai.hongbao.cqrs.c.domain.hongbaodianorder.OrderNotFoundException;
 import com.anbang.qipai.hongbao.cqrs.c.domain.hongbaodianorder.TimeLimitException;
 import com.anbang.qipai.hongbao.cqrs.c.domain.member.MemberNotFoundException;
 import com.anbang.qipai.hongbao.cqrs.c.service.HongbaodianOrderCmdService;
@@ -24,8 +24,8 @@ import com.anbang.qipai.hongbao.cqrs.c.service.MemberHongbaodianCmdService;
 import com.anbang.qipai.hongbao.cqrs.q.dbo.AuthorizationDbo;
 import com.anbang.qipai.hongbao.cqrs.q.dbo.HongbaodianOrder;
 import com.anbang.qipai.hongbao.cqrs.q.dbo.HongbaodianProduct;
+import com.anbang.qipai.hongbao.cqrs.q.dbo.MemberHongbaodianAccountDbo;
 import com.anbang.qipai.hongbao.cqrs.q.dbo.MemberHongbaodianRecordDbo;
-import com.anbang.qipai.hongbao.cqrs.q.dbo.RewardType;
 import com.anbang.qipai.hongbao.cqrs.q.service.HongbaodianOrderService;
 import com.anbang.qipai.hongbao.cqrs.q.service.HongbaodianProductService;
 import com.anbang.qipai.hongbao.cqrs.q.service.MemberAuthQueryService;
@@ -186,7 +186,13 @@ public class HongbaodianProductController {
 			vo.setMsg("invalid product");
 			return vo;
 		}
+		MemberHongbaodianAccountDbo account = memberHongbaodianService.findAccountByMemberId(memberId);
 		int price = product.getPrice();
+		if (account == null || account.getBalance() < price) {
+			vo.setSuccess(false);
+			vo.setMsg("InsufficientBalanceException");
+			return vo;
+		}
 		AuthorizationDbo openAthDbo = memberAuthQueryService.findAuthorizationDboByMemberIdAndPublisher(memberId,
 				"open.weixin.app.qipai");
 		if (openAthDbo == null) {
@@ -213,27 +219,26 @@ public class HongbaodianProductController {
 			MemberHongbaodianRecordDbo dbo = memberHongbaodianService.withdraw(record, memberId);
 			hongbaodianRecordMsgService.newRecord(dbo);
 			// 返利
-			if (order.getRewardType().equals(RewardType.HONGBAORMB)) {// 现金返利
-				try {
-					String reason = giveRewardRMBToMember(order);
-					if (!StringUtil.isBlank(reason)) {
-						vo.setSuccess(false);
-						vo.setMsg(reason);
-						return vo;
-					}
-				} catch (Exception e) {
-					vo.setSuccess(false);
-					vo.setMsg(e.getClass().getName());
-					return vo;
-				}
-			}
+			// if (order.getRewardType().equals(RewardType.HONGBAORMB)) {// 现金返利
+			// try {
+			// String reason = giveRewardRMBToMember(order);
+			// if (!StringUtil.isBlank(reason)) {
+			// vo.setSuccess(false);
+			// vo.setMsg(reason);
+			// return vo;
+			// }
+			// } catch (Exception e) {
+			// vo.setSuccess(false);
+			// vo.setMsg(e.getClass().getName());
+			// return vo;
+			// }
+			// }
 			// 测试
-			// Map<String, String> responseMap = new HashMap<>();
-			// responseMap.put("result", "test");
-			// hongbaodianOrderCmdService.finishOrder(order.getId());
-			// HongbaodianOrder finishOrder = hongbaodianOrderService.finishOrder(order,
-			// responseMap, "FINISH");
-			// hongbaodianOrderMsgService.finishHongbaodianOrder(finishOrder);
+			Map<String, String> responseMap = new HashMap<>();
+			responseMap.put("result", "test");
+			hongbaodianOrderCmdService.finishOrder(order.getId());
+			HongbaodianOrder finishOrder = hongbaodianOrderService.finishOrder(order, responseMap, "FINISH");
+			hongbaodianOrderMsgService.finishHongbaodianOrder(finishOrder);
 		} catch (MemberNotFoundException e) {
 			vo.setSuccess(false);
 			vo.setMsg("MemberNotFoundException");
@@ -253,6 +258,10 @@ public class HongbaodianProductController {
 			vo.setData(data);
 			vo.setSuccess(false);
 			vo.setMsg("TimeLimitException");
+			return vo;
+		} catch (OrderNotFoundException e) {
+			vo.setSuccess(false);
+			vo.setMsg("OrderNotFoundException");
 			return vo;
 		}
 		return vo;
