@@ -152,8 +152,8 @@ public class MemberHongbaodianController {
 	/**
 	 * 临时用
 	 */
-	@RequestMapping("/createaccount")
-	public CommonVO createAccount() {
+	@RequestMapping("/init")
+	public CommonVO init() {
 		CommonVO vo = new CommonVO();
 		List<MemberDbo> memberList = memberAuthQueryService.findAllMembers();
 		for (MemberDbo member : memberList) {

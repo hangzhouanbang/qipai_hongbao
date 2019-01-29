@@ -8,9 +8,9 @@ package com.anbang.qipai.hongbao.plan.bean;
  */
 public class MemberInvitationRecord {
 	private String id;
-	private String memberId;// 邀请人id
-	private String nickname;// 被邀请玩家id
-	private String invitationMemberId;// 邀请人昵称
+	private String memberId;// 邀请玩家id
+	private String nickname;// 邀请玩家昵称
+	private String invitationMemberId;// 被邀请人id
 	private String invitationMemberNickname;// 被邀请玩家昵称
 	private long createTime;
 

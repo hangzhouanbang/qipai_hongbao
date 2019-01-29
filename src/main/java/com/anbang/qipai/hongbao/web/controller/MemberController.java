@@ -1,5 +1,7 @@
 package com.anbang.qipai.hongbao.web.controller;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
@@ -16,6 +18,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import com.anbang.qipai.hongbao.conf.WXPayConfig;
 import com.anbang.qipai.hongbao.cqrs.c.service.MemberAuthService;
 import com.anbang.qipai.hongbao.cqrs.q.dbo.MemberDbo;
 import com.anbang.qipai.hongbao.cqrs.q.service.MemberAuthQueryService;
@@ -31,10 +34,6 @@ import com.highto.framework.web.page.ListPage;
 @Controller
 @RequestMapping("/member")
 public class MemberController {
-
-	private static String APPID = "wxb841e562b0100c95";
-
-	private static String APPSECRET = "c411423c15fdd51bde4ec432732d26df";
 
 	private Gson gson = new Gson();
 
@@ -57,10 +56,45 @@ public class MemberController {
 	private QipaiMembersRemoteService qipaiMembersRemoteService;
 
 	/**
+	 * 微信引导
+	 */
+	@RequestMapping(value = "/share")
+	@ResponseBody
+	public CommonVO share(String token) {
+		CommonVO vo = new CommonVO();
+		String memberId = memberAuthService.getMemberIdBySessionId(token);
+		if (memberId == null) {
+			vo.setSuccess(false);
+			vo.setMsg("invalid token");
+			return vo;
+		}
+		String URL = "https://open.weixin.qq.com/connect/oauth2/authorize";
+		URL += "?appid=" + WXPayConfig.APPID;
+		String REDIRECT_URI = null;
+		try {
+			REDIRECT_URI = URLEncoder.encode("http://scs.3cscy.com/hongbao/member/login", "utf-8");
+		} catch (UnsupportedEncodingException e) {
+			e.printStackTrace();
+		}
+		URL += "&redirect_uri=" + REDIRECT_URI;
+		URL += "&response_type=code";
+		URL += "&scope=snsapi_userinfo";
+		URL += "&state=" + memberId;
+		URL += "#wechat_redirect";
+		Map data = new HashMap<>();
+		vo.setData(data);
+		data.put("URL", URL);
+		return vo;
+	}
+
+	/**
 	 * 邀请新玩家
 	 */
 	@RequestMapping(value = "/memberlogin")
 	public String member_login(String code, String state) {
+		if (StringUtil.isBlank(state)) {
+			return "";
+		}
 		Map map = null;
 		try {
 			map = takeOauth2AccessToken(code);
@@ -100,7 +134,7 @@ public class MemberController {
 					&& memberInvitationRecordService.findMemberInvitationRecordByInvitationMemberId(memberId) == null) {
 				MemberDbo member = memberAuthQueryService.findByMemberId(state);
 				if (member == null) {
-					return "redirect:http://scs.3cscy.com/majiang/u3D/html/xiazai.html";
+					return "";
 				}
 				MemberDbo invitateMember = memberAuthQueryService.findByMemberId(memberId);
 				// 邀请记录
@@ -178,8 +212,8 @@ public class MemberController {
 			// 拼接请求地址
 			String requestUrl = "https://api.weixin.qq.com/sns/oauth2/access_token";// ?appid=APPID&secret=SECRET&code=CODE&grant_type=authorization_code";
 			Request request = sslHttpClient.POST(requestUrl).timeout(2, TimeUnit.SECONDS);
-			request.param("appid", APPID);
-			request.param("secret", APPSECRET);
+			request.param("appid", WXPayConfig.APPID);
+			request.param("secret", WXPayConfig.APPSECRET);
 			request.param("code", code);
 			request.param("grant_type", "authorization_code");
 			ContentResponse response = request.send();
