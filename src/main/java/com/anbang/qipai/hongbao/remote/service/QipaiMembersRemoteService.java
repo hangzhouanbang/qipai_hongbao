@@ -18,8 +18,8 @@ public interface QipaiMembersRemoteService {
 	@RequestMapping(value = "/auth/trytoken")
 	public CommonRemoteVO auth_trytoken(@RequestParam(value = "token") String token);
 
-	@RequestMapping(value = "/thirdauth/wechatidlogin")
-	public CommonRemoteVO thirdauth_wechatidlogin(@RequestParam(value = "unionid") String unionid,
+	@RequestMapping(value = "/thirdauth/wechatidlogin_gongzhonghao")
+	public CommonRemoteVO thirdauth_wechatidlogin_gongzhonghao(@RequestParam(value = "unionid") String unionid,
 			@RequestParam(value = "openid") String openid, @RequestParam(value = "nickname") String nickname,
 			@RequestParam(value = "headimgurl") String headimgurl, @RequestParam(value = "sex") Integer sex);
 

@@ -18,7 +18,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import com.anbang.qipai.hongbao.conf.WXPayConfig;
+import com.anbang.qipai.hongbao.conf.GongZhongHaoConfig;
+import com.anbang.qipai.hongbao.conf.MemberInvitationRecordState;
 import com.anbang.qipai.hongbao.cqrs.c.service.MemberAuthService;
 import com.anbang.qipai.hongbao.cqrs.q.dbo.MemberDbo;
 import com.anbang.qipai.hongbao.cqrs.q.service.MemberAuthQueryService;
@@ -62,6 +63,9 @@ public class MemberController {
 	@ResponseBody
 	public CommonVO share(String token) {
 		CommonVO vo = new CommonVO();
+		if (token == null) {
+			token = "";
+		}
 		String memberId = memberAuthService.getMemberIdBySessionId(token);
 		if (memberId == null) {
 			vo.setSuccess(false);
@@ -69,10 +73,10 @@ public class MemberController {
 			return vo;
 		}
 		String URL = "https://open.weixin.qq.com/connect/oauth2/authorize";
-		URL += "?appid=" + WXPayConfig.APPID;
+		URL += "?appid=" + GongZhongHaoConfig.APPID;
 		String REDIRECT_URI = null;
 		try {
-			REDIRECT_URI = URLEncoder.encode("http://scs.3cscy.com/hongbao/member/login", "utf-8");
+			REDIRECT_URI = URLEncoder.encode("http://scs.3cscy.com/hongbao/member/memberlogin", "utf-8");
 		} catch (UnsupportedEncodingException e) {
 			e.printStackTrace();
 		}
@@ -93,17 +97,17 @@ public class MemberController {
 	@RequestMapping(value = "/memberlogin")
 	public String member_login(String code, String state) {
 		if (StringUtil.isBlank(state)) {
-			return "";
+			return "redirect:http://scs.3cscy.com/majiang/u3D/html/red_packet.html";
 		}
 		Map map = null;
 		try {
 			map = takeOauth2AccessToken(code);
 		} catch (Exception e) {
-			return "";
+			return "redirect:http://scs.3cscy.com/majiang/u3D/html/red_packet.html";
 		}
 		Object errObj = map.get("errcode");
 		if (errObj != null) {
-			return "";
+			return "redirect:http://scs.3cscy.com/majiang/u3D/html/red_packet.html";
 		}
 		String accessToken = (String) map.get("access_token");
 		String openid = (String) map.get("openid");
@@ -111,7 +115,7 @@ public class MemberController {
 		try {
 			infomap = takeUserInfo(accessToken, openid);
 		} catch (Exception e) {
-			return "";
+			return "redirect:http://scs.3cscy.com/majiang/u3D/html/red_packet.html";
 		}
 		String nickname = (String) infomap.get("nickname");
 		String headimgurl = (String) infomap.get("headimgurl");
@@ -119,11 +123,11 @@ public class MemberController {
 		int sex = Double.valueOf((double) infomap.get("sex")).intValue();
 		// 玩家是否已经注册
 		if (memberAuthQueryService.findThirdAuthorizationDbo("union.weixin", unionid) != null) {
-			return "redirect:http://scs.3cscy.com/majiang/u3D/html/xiazai.html";
+			return "redirect:http://scs.3cscy.com/majiang/u3D/html/red_packet.html";
 		}
 		// 用户注册
-		CommonRemoteVO rvo = qipaiMembersRemoteService.thirdauth_wechatidlogin(unionid, openid, nickname, headimgurl,
-				sex);
+		CommonRemoteVO rvo = qipaiMembersRemoteService.thirdauth_wechatidlogin_gongzhonghao(unionid, openid, nickname,
+				headimgurl, sex);
 		// 注册成功
 		if (rvo.isSuccess()) {
 			String json = gson.toJson(rvo.getData());
@@ -134,7 +138,7 @@ public class MemberController {
 					&& memberInvitationRecordService.findMemberInvitationRecordByInvitationMemberId(memberId) == null) {
 				MemberDbo member = memberAuthQueryService.findByMemberId(state);
 				if (member == null) {
-					return "";
+					return "redirect:http://scs.3cscy.com/majiang/u3D/html/red_packet.html";
 				}
 				MemberDbo invitateMember = memberAuthQueryService.findByMemberId(memberId);
 				// 邀请记录
@@ -142,6 +146,7 @@ public class MemberController {
 				record.setMemberId(state);
 				record.setNickname(member.getNickname());
 				record.setInvitationMemberId(memberId);
+				record.setState(MemberInvitationRecordState.PROCESSING);
 				if (invitateMember != null) {
 					// 如果未收到新玩家消息则不填昵称
 					record.setInvitationMemberNickname(invitateMember.getNickname());
@@ -150,9 +155,9 @@ public class MemberController {
 				memberInvitationRecordService.insertMemberInvitationRecord(record);
 				memberInvitationRecordMsgService.newRecord(record);
 			}
-			return "redirect:http://scs.3cscy.com/majiang/u3D/html/xiazai.html";
+			return "redirect:http://scs.3cscy.com/majiang/u3D/html/red_packet.html";
 		}
-		return "";
+		return "redirect:http://scs.3cscy.com/majiang/u3D/html/red_packet.html";
 	}
 
 	/**
@@ -165,7 +170,7 @@ public class MemberController {
 				.findMemberInvitationRecordByInvitationMemberId(inviteMemberId) == null) {
 			MemberDbo member = memberAuthQueryService.findByMemberId(memberId);
 			if (member == null) {
-				return "";
+				return "redirect:http://scs.3cscy.com/majiang/u3D/html/red_packet.html";
 			}
 			MemberDbo invitateMember = memberAuthQueryService.findByMemberId(inviteMemberId);
 			// 邀请记录
@@ -177,12 +182,13 @@ public class MemberController {
 				// 如果未收到新玩家消息则不填昵称
 				record.setInvitationMemberNickname(invitateMember.getNickname());
 			}
+			record.setState(MemberInvitationRecordState.PROCESSING);
 			record.setCreateTime(System.currentTimeMillis());
 			memberInvitationRecordService.insertMemberInvitationRecord(record);
 			memberInvitationRecordMsgService.newRecord(record);
-			return "redirect:http://scs.3cscy.com/majiang/u3D/html/xiazai.html";
+			return "redirect:http://scs.3cscy.com/majiang/u3D/html/red_packet.html";
 		}
-		return "";
+		return "redirect:http://scs.3cscy.com/majiang/u3D/html/red_packet.html";
 	}
 
 	/**
@@ -191,7 +197,7 @@ public class MemberController {
 	@RequestMapping("/queryinvitation")
 	@ResponseBody
 	public CommonVO queryInvitationRecord(@RequestParam(defaultValue = "1") int page,
-			@RequestParam(defaultValue = "30") int size, String token) {
+			@RequestParam(defaultValue = "300") int size, String token) {
 		CommonVO vo = new CommonVO();
 		String memberId = memberAuthService.getMemberIdBySessionId(token);
 		if (memberId == null) {
@@ -212,8 +218,8 @@ public class MemberController {
 			// 拼接请求地址
 			String requestUrl = "https://api.weixin.qq.com/sns/oauth2/access_token";// ?appid=APPID&secret=SECRET&code=CODE&grant_type=authorization_code";
 			Request request = sslHttpClient.POST(requestUrl).timeout(2, TimeUnit.SECONDS);
-			request.param("appid", WXPayConfig.APPID);
-			request.param("secret", WXPayConfig.APPSECRET);
+			request.param("appid", GongZhongHaoConfig.APPID);
+			request.param("secret", GongZhongHaoConfig.APPSECRET);
 			request.param("code", code);
 			request.param("grant_type", "authorization_code");
 			ContentResponse response = request.send();

@@ -5,6 +5,7 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.anbang.qipai.hongbao.conf.MemberInvitationRecordState;
 import com.anbang.qipai.hongbao.plan.bean.MemberInvitationRecord;
 import com.anbang.qipai.hongbao.plan.dao.MemberInvitationRecordDao;
 import com.highto.framework.web.page.ListPage;
@@ -19,6 +20,11 @@ public class MemberInvitationRecordService {
 		memberInvitationRecordDao.insert(record);
 	}
 
+	public MemberInvitationRecord updateMemberInvitationRecordState(String id, String state) {
+		memberInvitationRecordDao.updateState(id, state);
+		return memberInvitationRecordDao.findById(id);
+	}
+
 	public MemberInvitationRecord findMemberInvitationRecordByMemberIdAndInvitationMemberId(String memberId,
 			String invitationMemberId) {
 		return memberInvitationRecordDao.findByMemberIdAndInvitationMemberId(memberId, invitationMemberId);
@@ -29,8 +35,9 @@ public class MemberInvitationRecordService {
 	}
 
 	public ListPage findMemberInvitationRecordByMemberId(int page, int size, String memberId) {
-		long amount = memberInvitationRecordDao.countByMemberId(memberId);
-		List<MemberInvitationRecord> records = memberInvitationRecordDao.findByMemberId(page, size, memberId);
+		long amount = memberInvitationRecordDao.countByMemberId(memberId, MemberInvitationRecordState.SUCCESS);
+		List<MemberInvitationRecord> records = memberInvitationRecordDao.findByMemberId(page, size, memberId,
+				MemberInvitationRecordState.SUCCESS);
 		ListPage listPage = new ListPage(records, page, size, (int) amount);
 		return listPage;
 	}

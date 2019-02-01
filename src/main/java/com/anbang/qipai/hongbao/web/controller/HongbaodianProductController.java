@@ -7,6 +7,7 @@ import javax.servlet.http.HttpServletRequest;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.util.EntityUtils;
+import org.eclipse.jetty.util.StringUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -15,7 +16,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.anbang.qipai.hongbao.conf.IPVerifyConfig;
 import com.anbang.qipai.hongbao.cqrs.c.domain.hongbaodianorder.OrderHasAlreadyExistenceException;
-import com.anbang.qipai.hongbao.cqrs.c.domain.hongbaodianorder.OrderNotFoundException;
 import com.anbang.qipai.hongbao.cqrs.c.domain.hongbaodianorder.TimeLimitException;
 import com.anbang.qipai.hongbao.cqrs.c.domain.member.MemberNotFoundException;
 import com.anbang.qipai.hongbao.cqrs.c.service.HongbaodianOrderCmdService;
@@ -26,6 +26,7 @@ import com.anbang.qipai.hongbao.cqrs.q.dbo.HongbaodianOrder;
 import com.anbang.qipai.hongbao.cqrs.q.dbo.HongbaodianProduct;
 import com.anbang.qipai.hongbao.cqrs.q.dbo.MemberHongbaodianAccountDbo;
 import com.anbang.qipai.hongbao.cqrs.q.dbo.MemberHongbaodianRecordDbo;
+import com.anbang.qipai.hongbao.cqrs.q.dbo.RewardType;
 import com.anbang.qipai.hongbao.cqrs.q.service.HongbaodianOrderService;
 import com.anbang.qipai.hongbao.cqrs.q.service.HongbaodianProductService;
 import com.anbang.qipai.hongbao.cqrs.q.service.MemberAuthQueryService;
@@ -219,26 +220,27 @@ public class HongbaodianProductController {
 			MemberHongbaodianRecordDbo dbo = memberHongbaodianService.withdraw(record, memberId);
 			hongbaodianRecordMsgService.newRecord(dbo);
 			// 返利
-			// if (order.getRewardType().equals(RewardType.HONGBAORMB)) {// 现金返利
-			// try {
-			// String reason = giveRewardRMBToMember(order);
-			// if (!StringUtil.isBlank(reason)) {
-			// vo.setSuccess(false);
-			// vo.setMsg(reason);
-			// return vo;
-			// }
-			// } catch (Exception e) {
-			// vo.setSuccess(false);
-			// vo.setMsg(e.getClass().getName());
-			// return vo;
-			// }
-			// }
+			if (order.getRewardType().equals(RewardType.HONGBAORMB)) {// 现金返利
+				try {
+					String reason = giveRewardRMBToMember(order);
+					if (!StringUtil.isBlank(reason)) {
+						vo.setSuccess(false);
+						vo.setMsg(reason);
+						return vo;
+					}
+				} catch (Exception e) {
+					vo.setSuccess(false);
+					vo.setMsg(e.getClass().getName());
+					return vo;
+				}
+			}
 			// 测试
-			Map<String, String> responseMap = new HashMap<>();
-			responseMap.put("result", "test");
-			hongbaodianOrderCmdService.finishOrder(order.getId());
-			HongbaodianOrder finishOrder = hongbaodianOrderService.finishOrder(order, responseMap, "FINISH");
-			hongbaodianOrderMsgService.finishHongbaodianOrder(finishOrder);
+			// Map<String, String> responseMap = new HashMap<>();
+			// responseMap.put("result", "test");
+			// hongbaodianOrderCmdService.finishOrder(order.getId());
+			// HongbaodianOrder finishOrder = hongbaodianOrderService.finishOrder(order,
+			// responseMap, "FINISH");
+			// hongbaodianOrderMsgService.finishHongbaodianOrder(finishOrder);
 		} catch (MemberNotFoundException e) {
 			vo.setSuccess(false);
 			vo.setMsg("MemberNotFoundException");
@@ -259,10 +261,10 @@ public class HongbaodianProductController {
 			vo.setSuccess(false);
 			vo.setMsg("TimeLimitException");
 			return vo;
-		} catch (OrderNotFoundException e) {
-			vo.setSuccess(false);
-			vo.setMsg("OrderNotFoundException");
-			return vo;
+			// } catch (OrderNotFoundException e) {
+			// vo.setSuccess(false);
+			// vo.setMsg("OrderNotFoundException");
+			// return vo;
 		}
 		return vo;
 	}
@@ -300,8 +302,8 @@ public class HongbaodianProductController {
 		if (num > 4) {// 有4个以上的账号用该IP做登录
 			return false;
 		}
-		String host = "https://ali-ip.showapi.com";
-		String path = "/ip";
+		String host = "http://iploc.market.alicloudapi.com";
+		String path = "/v3/ip";
 		String method = "GET";
 		String appcode = IPVerifyConfig.APPCODE;
 		Map<String, String> headers = new HashMap<String, String>();
@@ -312,11 +314,16 @@ public class HongbaodianProductController {
 
 		try {
 			HttpResponse response = HttpUtil.doGet(host, path, method, headers, querys);
-			Map map = gson.fromJson(EntityUtils.toString(response.getEntity()), Map.class);
-			String showapi_res_body = (String) map.get("showapi_res_body");
-			Map data = gson.fromJson(showapi_res_body, Map.class);
-			String city = (String) data.get("city");
-			if (city.equals("温州")) {
+			String entity = EntityUtils.toString(response.getEntity());
+			Map map = gson.fromJson(entity, Map.class);
+			String status = (String) map.get("status");
+			String info = (String) map.get("info");
+			String infocode = (String) map.get("infocode");
+			String province = (String) map.get("province");
+			String adcode = (String) map.get("adcode");
+			String city = (String) map.get("city");
+			if (status.equals("1") && info.equals("OK") && province.equals("浙江省") && infocode.equals("10000")
+					&& city.equals("温州市") && adcode.equals("330300")) {
 				return true;
 			}
 		} catch (Exception e) {

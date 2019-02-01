@@ -8,6 +8,7 @@ import org.springframework.data.domain.Sort.Direction;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
+import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.stereotype.Component;
 
 import com.anbang.qipai.hongbao.plan.bean.MemberInvitationRecord;
@@ -40,9 +41,10 @@ public class MongodbMemberInvitationRecordDao implements MemberInvitationRecordD
 	}
 
 	@Override
-	public List<MemberInvitationRecord> findByMemberId(int page, int size, String memberId) {
+	public List<MemberInvitationRecord> findByMemberId(int page, int size, String memberId, String state) {
 		Query query = new Query();
 		query.addCriteria(Criteria.where("memberId").is(memberId));
+		query.addCriteria(Criteria.where("state").is(state));
 		query.skip((page - 1) * size);
 		query.limit(size);
 		query.with(new Sort(Direction.DESC, "createTime"));
@@ -50,10 +52,27 @@ public class MongodbMemberInvitationRecordDao implements MemberInvitationRecordD
 	}
 
 	@Override
-	public long countByMemberId(String memberId) {
+	public long countByMemberId(String memberId, String state) {
 		Query query = new Query();
 		query.addCriteria(Criteria.where("memberId").is(memberId));
+		query.addCriteria(Criteria.where("state").is(state));
 		return mongoTemplate.count(query, MemberInvitationRecord.class);
+	}
+
+	@Override
+	public void updateState(String id, String state) {
+		Query query = new Query();
+		query.addCriteria(Criteria.where("id").is(id));
+		Update update = new Update();
+		update.set("state", state);
+		mongoTemplate.updateFirst(query, update, MemberInvitationRecord.class);
+	}
+
+	@Override
+	public MemberInvitationRecord findById(String id) {
+		Query query = new Query();
+		query.addCriteria(Criteria.where("id").is(id));
+		return mongoTemplate.findOne(query, MemberInvitationRecord.class);
 	}
 
 }

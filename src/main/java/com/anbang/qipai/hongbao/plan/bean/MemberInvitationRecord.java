@@ -12,6 +12,7 @@ public class MemberInvitationRecord {
 	private String nickname;// 邀请玩家昵称
 	private String invitationMemberId;// 被邀请人id
 	private String invitationMemberNickname;// 被邀请玩家昵称
+	private String state;// 邀请状态
 	private long createTime;
 
 	public String getId() {
@@ -60,6 +61,14 @@ public class MemberInvitationRecord {
 
 	public void setCreateTime(long createTime) {
 		this.createTime = createTime;
+	}
+
+	public String getState() {
+		return state;
+	}
+
+	public void setState(String state) {
+		this.state = state;
 	}
 
 }

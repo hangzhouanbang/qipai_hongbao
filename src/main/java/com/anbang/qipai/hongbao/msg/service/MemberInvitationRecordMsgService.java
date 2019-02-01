@@ -19,4 +19,11 @@ public class MemberInvitationRecordMsgService {
 		mo.setData(record);
 		memberInvitationRecordSource.memberInvitationRecord().send(MessageBuilder.withPayload(mo).build());
 	}
+
+	public void updateRecord(MemberInvitationRecord record) {
+		CommonMO mo = new CommonMO();
+		mo.setMsg("update record");
+		mo.setData(record);
+		memberInvitationRecordSource.memberInvitationRecord().send(MessageBuilder.withPayload(mo).build());
+	}
 }

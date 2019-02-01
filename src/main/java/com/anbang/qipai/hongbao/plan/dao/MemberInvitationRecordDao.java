@@ -8,11 +8,15 @@ public interface MemberInvitationRecordDao {
 
 	void insert(MemberInvitationRecord record);
 
+	void updateState(String id, String state);
+
 	MemberInvitationRecord findByMemberIdAndInvitationMemberId(String memberId, String invitationMemberId);
 
 	MemberInvitationRecord findByInvitationMemberId(String invitationMemberId);
 
-	List<MemberInvitationRecord> findByMemberId(int page, int size, String memberId);
+	MemberInvitationRecord findById(String id);
 
-	long countByMemberId(String memberId);
+	List<MemberInvitationRecord> findByMemberId(int page, int size, String memberId, String state);
+
+	long countByMemberId(String memberId, String state);
 }

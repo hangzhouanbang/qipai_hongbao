@@ -69,7 +69,7 @@ public class HongbaodianOrderService {
 			spbill_create_ip = IPUtil.getLocalHostRelIP();
 		} catch (Exception e) {
 		}
-		order.setReqIP(spbill_create_ip);
+		order.setSpbill_create_ip(spbill_create_ip);
 		order.setStatus("PROCESSING");
 		order.setCreateTime(System.currentTimeMillis());
 		order.setDesc(desc);
