@@ -203,7 +203,7 @@ public class HongbaodianProductController {
 		}
 		String reqIP = IPUtil.getRealIp(request);
 		WhiteList whitelist = whiteListService.findByPlayerId(memberId);
-		if (whitelist == null && !verifyReqIP(reqIP)) {// ip不在白名单并且无效
+		if (whitelist == null && !verifyReqIP(request)) {// ip不在白名单并且无效
 			vo.setSuccess(false);
 			vo.setMsg("invalid ip");
 			return vo;
@@ -297,9 +297,13 @@ public class HongbaodianProductController {
 	/**
 	 * 验证ip
 	 */
-	private boolean verifyReqIP(String reqIP) {
+	private boolean verifyReqIP(HttpServletRequest request) {
+		if (!IPUtil.verifyIp(request)) {
+			return false;
+		}
+		String reqIP = IPUtil.getRealIp(request);
 		int num = memberLoginRecordService.countMemberNumByLoginIp(reqIP);
-		if (num > 4) {// 有4个以上的账号用该IP做登录
+		if (num > 2) {// 有2个以上的账号用该IP做登录
 			return false;
 		}
 		String host = "http://iploc.market.alicloudapi.com";
