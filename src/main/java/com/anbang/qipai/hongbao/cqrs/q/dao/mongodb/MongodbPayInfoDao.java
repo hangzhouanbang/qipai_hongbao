@@ -10,7 +10,6 @@ import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.stereotype.Component;
 
 import com.anbang.qipai.hongbao.cqrs.q.dao.PayInfoDao;
-import com.anbang.qipai.hongbao.cqrs.q.dbo.HongbaodianProduct;
 import com.anbang.qipai.hongbao.cqrs.q.dbo.PayInfo;
 
 @Component
@@ -46,7 +45,7 @@ public class MongodbPayInfoDao implements PayInfoDao {
 		query.addCriteria(Criteria.where("orderId").is(orderId));
 		Update update = new Update();
 		update.set("finishTime", finishTime);
-		mongoTemplate.updateFirst(query, update, HongbaodianProduct.class);
+		mongoTemplate.updateFirst(query, update, PayInfo.class);
 	}
 
 }
