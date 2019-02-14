@@ -76,7 +76,7 @@ public class MemberController {
 		URL += "?appid=" + GongZhongHaoConfig.APPID;
 		String REDIRECT_URI = null;
 		try {
-			REDIRECT_URI = URLEncoder.encode("http://scs.3cscy.com/hongbao/member/memberlogin", "utf-8");
+			REDIRECT_URI = URLEncoder.encode("http://3cs.3cscy.com/hongbao/member/memberlogin", "utf-8");
 		} catch (UnsupportedEncodingException e) {
 			e.printStackTrace();
 		}
@@ -97,17 +97,17 @@ public class MemberController {
 	@RequestMapping(value = "/memberlogin")
 	public String member_login(String code, String state) {
 		if (StringUtil.isBlank(state)) {
-			return "redirect:http://scs.3cscy.com/majiang/u3D/html/red_packet.html";
+			return "redirect:http://3cs.3cscy.com/majiang/u3D/html/red_packet.html";
 		}
 		Map map = null;
 		try {
 			map = takeOauth2AccessToken(code);
 		} catch (Exception e) {
-			return "redirect:http://scs.3cscy.com/majiang/u3D/html/red_packet.html";
+			return "redirect:http://3cs.3cscy.com/majiang/u3D/html/red_packet.html";
 		}
 		Object errObj = map.get("errcode");
 		if (errObj != null) {
-			return "redirect:http://scs.3cscy.com/majiang/u3D/html/red_packet.html";
+			return "redirect:http://3cs.3cscy.com/majiang/u3D/html/red_packet.html";
 		}
 		String accessToken = (String) map.get("access_token");
 		String openid = (String) map.get("openid");
@@ -115,7 +115,7 @@ public class MemberController {
 		try {
 			infomap = takeUserInfo(accessToken, openid);
 		} catch (Exception e) {
-			return "redirect:http://scs.3cscy.com/majiang/u3D/html/red_packet.html";
+			return "redirect:http://3cs.3cscy.com/majiang/u3D/html/red_packet.html";
 		}
 		String nickname = (String) infomap.get("nickname");
 		String headimgurl = (String) infomap.get("headimgurl");
@@ -123,7 +123,7 @@ public class MemberController {
 		int sex = Double.valueOf((double) infomap.get("sex")).intValue();
 		// 玩家是否已经注册
 		if (memberAuthQueryService.findThirdAuthorizationDbo("union.weixin", unionid) != null) {
-			return "redirect:http://scs.3cscy.com/majiang/u3D/html/red_packet.html";
+			return "redirect:http://3cs.3cscy.com/majiang/u3D/html/red_packet.html";
 		}
 		// 用户注册
 		CommonRemoteVO rvo = qipaiMembersRemoteService.thirdauth_wechatidlogin_gongzhonghao(unionid, openid, nickname,
@@ -138,7 +138,7 @@ public class MemberController {
 					&& memberInvitationRecordService.findMemberInvitationRecordByInvitationMemberId(memberId) == null) {
 				MemberDbo member = memberAuthQueryService.findByMemberId(state);
 				if (member == null) {
-					return "redirect:http://scs.3cscy.com/majiang/u3D/html/red_packet.html";
+					return "redirect:http://3cs.3cscy.com/majiang/u3D/html/red_packet.html";
 				}
 				MemberDbo invitateMember = memberAuthQueryService.findByMemberId(memberId);
 				// 邀请记录
@@ -155,9 +155,9 @@ public class MemberController {
 				memberInvitationRecordService.insertMemberInvitationRecord(record);
 				memberInvitationRecordMsgService.newRecord(record);
 			}
-			return "redirect:http://scs.3cscy.com/majiang/u3D/html/red_packet.html";
+			return "redirect:http://3cs.3cscy.com/majiang/u3D/html/red_packet.html";
 		}
-		return "redirect:http://scs.3cscy.com/majiang/u3D/html/red_packet.html";
+		return "redirect:http://3cs.3cscy.com/majiang/u3D/html/red_packet.html";
 	}
 
 	/**
@@ -170,7 +170,7 @@ public class MemberController {
 				.findMemberInvitationRecordByInvitationMemberId(inviteMemberId) == null) {
 			MemberDbo member = memberAuthQueryService.findByMemberId(memberId);
 			if (member == null) {
-				return "redirect:http://scs.3cscy.com/majiang/u3D/html/red_packet.html";
+				return "redirect:http://3cs.3cscy.com/majiang/u3D/html/red_packet.html";
 			}
 			MemberDbo invitateMember = memberAuthQueryService.findByMemberId(inviteMemberId);
 			// 邀请记录
@@ -186,9 +186,9 @@ public class MemberController {
 			record.setCreateTime(System.currentTimeMillis());
 			memberInvitationRecordService.insertMemberInvitationRecord(record);
 			memberInvitationRecordMsgService.newRecord(record);
-			return "redirect:http://scs.3cscy.com/majiang/u3D/html/red_packet.html";
+			return "redirect:http://3cs.3cscy.com/majiang/u3D/html/red_packet.html";
 		}
-		return "redirect:http://scs.3cscy.com/majiang/u3D/html/red_packet.html";
+		return "redirect:http://3cs.3cscy.com/majiang/u3D/html/red_packet.html";
 	}
 
 	/**
