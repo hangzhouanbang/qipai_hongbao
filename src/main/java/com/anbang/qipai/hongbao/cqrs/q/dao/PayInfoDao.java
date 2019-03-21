@@ -10,6 +10,8 @@ public interface PayInfoDao {
 
 	PayInfo findByOrderId(String orderId);
 
+	void updateQueryParamsByOrderId(String orderId, Map queryParams);
+
 	void updateReturnParamsByOrderId(String orderId, Map returnParams);
 
 	void updateFinishTime(String orderId, long finishTime);

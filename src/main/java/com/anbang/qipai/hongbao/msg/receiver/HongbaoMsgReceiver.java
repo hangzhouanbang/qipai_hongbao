@@ -61,7 +61,7 @@ public class HongbaoMsgReceiver {
 				Map<String, String> responseMap = new HashMap<>();
 				responseMap.put("result", "test");
 				hongbaodianOrderCmdService.finishOrder(order.getId());
-				RewardOrderDbo finishOrder = rewardOrderService.finishOrder(order, responseMap, "FINISH");
+				RewardOrderDbo finishOrder = rewardOrderService.finishOrder(order, responseMap, responseMap, "FINISH");
 				rewardOrderDboMsgService.finishRewardOrderDbo(finishOrder);
 			} catch (OrderHasAlreadyExistenceException e) {
 				// TODO Auto-generated catch block

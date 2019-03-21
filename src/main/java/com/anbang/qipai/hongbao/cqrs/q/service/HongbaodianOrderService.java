@@ -87,11 +87,13 @@ public class HongbaodianOrderService {
 		return order;
 	}
 
-	public HongbaodianOrder finishOrder(HongbaodianOrder order, Map<String, String> responseMap, String status) {
+	public HongbaodianOrder finishOrder(HongbaodianOrder order, Map<String, String> responseMap,
+			Map<String, String> queryMap, String status) {
 		hongbaodianOrderDao.updateFinishTime(order.getId(), System.currentTimeMillis());
 		hongbaodianOrderDao.updateStatus(order.getId(), status);
 		if (order.getRewardType().equals(RewardType.HONGBAORMB)) {
 			payInfoDao.updateReturnParamsByOrderId(order.getId(), responseMap);
+			payInfoDao.updateQueryParamsByOrderId(order.getId(), queryMap);
 			payInfoDao.updateFinishTime(order.getId(), System.currentTimeMillis());
 		}
 		return hongbaodianOrderDao.findById(order.getId());

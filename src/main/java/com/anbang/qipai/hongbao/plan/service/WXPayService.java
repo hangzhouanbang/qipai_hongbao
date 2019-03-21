@@ -44,16 +44,24 @@ public class WXPayService {
 	public Map<String, String> reward(HongbaodianOrder order) throws Exception {
 		String orderInfo = createRewardInfo(order);
 		SortedMap<String, String> responseMap = reward(orderInfo);
+		return responseMap;
+	}
+
+	public Map<String, String> query(HongbaodianOrder order) throws Exception {
 		String queryInfo = createQueryRewardInfo(order);
-		responseMap = queryReward(queryInfo);
+		SortedMap<String, String> responseMap = queryReward(queryInfo);
 		return responseMap;
 	}
 
 	public Map<String, String> reward(RewardOrderDbo order) throws Exception {
 		String orderInfo = createRewardInfo(order);
 		SortedMap<String, String> responseMap = reward(orderInfo);
+		return responseMap;
+	}
+
+	public Map<String, String> query(RewardOrderDbo order) throws Exception {
 		String queryInfo = createQueryRewardInfo(order);
-		responseMap = queryReward(queryInfo);
+		SortedMap<String, String> responseMap = queryReward(queryInfo);
 		return responseMap;
 	}
 

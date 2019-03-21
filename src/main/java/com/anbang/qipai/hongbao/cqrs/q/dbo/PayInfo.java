@@ -16,6 +16,7 @@ public class PayInfo {
 	private String spbill_create_ip;// 终端IP
 	private long createTime;// 发起时间
 	private Map returnParams;// 微信返回参数
+	private Map queryParams;// 微信查询返回参数
 	private long finishTime;// 结束时间
 
 	public String getId() {
@@ -80,6 +81,14 @@ public class PayInfo {
 
 	public void setFinishTime(long finishTime) {
 		this.finishTime = finishTime;
+	}
+
+	public Map getQueryParams() {
+		return queryParams;
+	}
+
+	public void setQueryParams(Map queryParams) {
+		this.queryParams = queryParams;
 	}
 
 }

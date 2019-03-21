@@ -63,10 +63,12 @@ public class RewardOrderService {
 		return order;
 	}
 
-	public RewardOrderDbo finishOrder(RewardOrderDbo order, Map<String, String> responseMap, String status) {
+	public RewardOrderDbo finishOrder(RewardOrderDbo order, Map<String, String> responseMap,
+			Map<String, String> queryMap, String status) {
 		rewardOrderDboDao.updateFinishTime(order.getId(), System.currentTimeMillis());
 		rewardOrderDboDao.updateStatus(order.getId(), status);
 		payInfoDao.updateReturnParamsByOrderId(order.getId(), responseMap);
+		payInfoDao.updateQueryParamsByOrderId(order.getId(), queryMap);
 		payInfoDao.updateFinishTime(order.getId(), System.currentTimeMillis());
 		return rewardOrderDboDao.findById(order.getId());
 	}

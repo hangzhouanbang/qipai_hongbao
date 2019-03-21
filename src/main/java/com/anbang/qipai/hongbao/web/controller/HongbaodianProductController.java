@@ -276,20 +276,21 @@ public class HongbaodianProductController {
 		String reason = null;
 		String status = "FINISH";
 		Map<String, String> responseMap = wxPayService.reward(order);
-		String return_code = responseMap.get("return_code");
-		String return_msg = responseMap.get("return_msg");
+		Map<String, String> queryMap = wxPayService.query(order);
+		String return_code = queryMap.get("return_code");
+		String return_msg = queryMap.get("return_msg");
 		reason = return_msg;
 		if ("SUCCESS".equals(return_code)) {
-			String result_code = responseMap.get("result_code");
-			String err_code_des = responseMap.get("err_code_des");
+			String result_code = queryMap.get("result_code");
+			String err_code_des = queryMap.get("err_code_des");
 			reason = err_code_des;
 			if ("SUCCESS".equals(result_code)) {
-				status = responseMap.get("status");
-				reason = responseMap.get("reason");
+				status = queryMap.get("status");
+				reason = queryMap.get("reason");
 			}
 		}
 		hongbaodianOrderCmdService.finishOrder(order.getId());
-		HongbaodianOrder finishOrder = hongbaodianOrderService.finishOrder(order, responseMap, status);
+		HongbaodianOrder finishOrder = hongbaodianOrderService.finishOrder(order, responseMap, queryMap, status);
 		hongbaodianOrderMsgService.finishHongbaodianOrder(finishOrder);
 		return reason;
 	}

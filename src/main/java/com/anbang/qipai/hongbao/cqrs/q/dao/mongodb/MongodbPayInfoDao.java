@@ -48,4 +48,13 @@ public class MongodbPayInfoDao implements PayInfoDao {
 		mongoTemplate.updateFirst(query, update, PayInfo.class);
 	}
 
+	@Override
+	public void updateQueryParamsByOrderId(String orderId, Map queryParams) {
+		Query query = new Query();
+		query.addCriteria(Criteria.where("orderId").is(orderId));
+		Update update = new Update();
+		update.set("queryParams", queryParams);
+		mongoTemplate.updateFirst(query, update, PayInfo.class);
+	}
+
 }
