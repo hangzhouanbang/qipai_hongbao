@@ -125,6 +125,12 @@ public class MemberController {
 		if (memberAuthQueryService.findThirdAuthorizationDbo("union.weixin", unionid) != null) {
 			return "redirect:http://3cs.3cscy.com/majiang/u3D/html/red_packet.html";
 		}
+		if (memberAuthQueryService.findThirdAuthorizationDbo("open.weixin.app.qipai", unionid) != null) {
+			return "redirect:http://3cs.3cscy.com/majiang/u3D/html/red_packet.html";
+		}
+		if (memberAuthQueryService.findThirdAuthorizationDbo("open.weixin.gongzhonghao.qipai", unionid) != null) {
+			return "redirect:http://3cs.3cscy.com/majiang/u3D/html/red_packet.html";
+		}
 		// 用户注册
 		CommonRemoteVO rvo = qipaiMembersRemoteService.thirdauth_wechatidlogin_gongzhonghao(unionid, openid, nickname,
 				headimgurl, sex);
