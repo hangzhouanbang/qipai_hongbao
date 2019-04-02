@@ -5,8 +5,6 @@ import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 
-import org.apache.http.HttpResponse;
-import org.apache.http.util.EntityUtils;
 import org.eclipse.jetty.util.StringUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -14,7 +12,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.anbang.qipai.hongbao.conf.IPVerifyConfig;
 import com.anbang.qipai.hongbao.cqrs.c.domain.hongbaodianorder.OrderHasAlreadyExistenceException;
 import com.anbang.qipai.hongbao.cqrs.c.domain.hongbaodianorder.TimeLimitException;
 import com.anbang.qipai.hongbao.cqrs.c.domain.member.MemberNotFoundException;
@@ -40,7 +37,6 @@ import com.anbang.qipai.hongbao.plan.service.MemberLoginLimitRecordService;
 import com.anbang.qipai.hongbao.plan.service.MemberLoginRecordService;
 import com.anbang.qipai.hongbao.plan.service.WXPayService;
 import com.anbang.qipai.hongbao.plan.service.WhiteListService;
-import com.anbang.qipai.hongbao.util.HttpUtil;
 import com.anbang.qipai.hongbao.util.IPUtil;
 import com.anbang.qipai.hongbao.web.vo.CommonVO;
 import com.dml.accounting.AccountingRecord;
@@ -307,32 +303,36 @@ public class HongbaodianProductController {
 		if (num > 2) {// 有2个以上的账号用该IP做登录
 			return false;
 		}
-		String host = "http://iploc.market.alicloudapi.com";
-		String path = "/v3/ip";
-		String method = "GET";
-		String appcode = IPVerifyConfig.APPCODE;
-		Map<String, String> headers = new HashMap<String, String>();
-		// 最后在header中的格式(中间是英文空格)为Authorization:APPCODE 83359fd73fe94948385f570e3c139105
-		headers.put("Authorization", "APPCODE " + appcode);
-		Map<String, String> querys = new HashMap<String, String>();
-		querys.put("ip", reqIP);
-
-		try {
-			HttpResponse response = HttpUtil.doGet(host, path, method, headers, querys);
-			String entity = EntityUtils.toString(response.getEntity());
-			Map map = gson.fromJson(entity, Map.class);
-			String status = (String) map.get("status");
-			String info = (String) map.get("info");
-			String infocode = (String) map.get("infocode");
-			String province = (String) map.get("province");
-			String adcode = (String) map.get("adcode");
-			String city = (String) map.get("city");
-			if (status.equals("1") && info.equals("OK") && province.equals("浙江省") && infocode.equals("10000")) {
-				return true;
-			}
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		return false;
+		// String host = "http://iploc.market.alicloudapi.com";
+		// String path = "/v3/ip";
+		// String method = "GET";
+		// String appcode = IPVerifyConfig.APPCODE;
+		// Map<String, String> headers = new HashMap<String, String>();
+		// // 最后在header中的格式(中间是英文空格)为Authorization:APPCODE
+		// 83359fd73fe94948385f570e3c139105
+		// headers.put("Authorization", "APPCODE " + appcode);
+		// Map<String, String> querys = new HashMap<String, String>();
+		// querys.put("ip", reqIP);
+		//
+		// try {
+		// HttpResponse response = HttpUtil.doGet(host, path, method, headers, querys);
+		// String entity = EntityUtils.toString(response.getEntity());
+		// Map map = gson.fromJson(entity, Map.class);
+		// String status = (String) map.get("status");
+		// String info = (String) map.get("info");
+		// String infocode = (String) map.get("infocode");
+		// String province = (String) map.get("province");
+		// String adcode = (String) map.get("adcode");
+		// String city = (String) map.get("city");
+		// if (status.equals("1") && info.equals("OK") && province.equals("浙江省") &&
+		// infocode.equals("10000")) {
+		// return true;
+		// }
+		// } catch (Exception e) {
+		// e.printStackTrace();
+		// }
+		// return false;
+		return true;
 	}
+
 }
