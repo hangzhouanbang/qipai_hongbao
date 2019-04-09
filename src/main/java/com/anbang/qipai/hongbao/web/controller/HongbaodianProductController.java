@@ -273,16 +273,17 @@ public class HongbaodianProductController {
 		String status = "FINISH";
 		Map<String, String> responseMap = wxPayService.reward(order);
 		Map<String, String> queryMap = wxPayService.query(order);
-		String return_code = queryMap.get("return_code");
-		String return_msg = queryMap.get("return_msg");
+		String return_code = responseMap.get("return_code");
+		String return_msg = responseMap.get("return_msg");
 		reason = return_msg;
 		if ("SUCCESS".equals(return_code)) {
-			String result_code = queryMap.get("result_code");
-			String err_code_des = queryMap.get("err_code_des");
-			reason = err_code_des;
-			if ("SUCCESS".equals(result_code)) {
-				status = queryMap.get("status");
-				reason = queryMap.get("reason");
+			String err_code = responseMap.get("err_code");
+			reason = err_code;
+			if (reason.equals("NOTENOUGH")) {// 余额不足
+				AccountingRecord record = memberHongbaodianCmdService.giveHongbaodianToMember(order.getPayerId(),
+						order.getProductPrice(), "return hongbaodian", System.currentTimeMillis());
+				MemberHongbaodianRecordDbo dbo = memberHongbaodianService.withdraw(record, order.getPayerId());
+				hongbaodianRecordMsgService.newRecord(dbo);
 			}
 		}
 		hongbaodianOrderCmdService.finishOrder(order.getId());
