@@ -22,7 +22,7 @@ public class QrCodeCreateUtil {
 	public static BufferedImage createQrCode(String content, int qrCodeSize) throws WriterException {
 		// 设置二维码纠错级别ＭＡＰ
 		Hashtable<EncodeHintType, ErrorCorrectionLevel> hintMap = new Hashtable<EncodeHintType, ErrorCorrectionLevel>();
-		hintMap.put(EncodeHintType.ERROR_CORRECTION, ErrorCorrectionLevel.M); // 矫错级别
+		hintMap.put(EncodeHintType.ERROR_CORRECTION, ErrorCorrectionLevel.L); // 矫错级别
 		QRCodeWriter qrCodeWriter = new QRCodeWriter();
 		// 创建比特矩阵(位矩阵)的QR码编码的字符串
 		BitMatrix byteMatrix = qrCodeWriter.encode(content, BarcodeFormat.QR_CODE, qrCodeSize, qrCodeSize, hintMap);
