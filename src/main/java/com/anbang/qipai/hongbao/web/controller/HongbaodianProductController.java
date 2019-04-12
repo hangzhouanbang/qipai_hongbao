@@ -279,7 +279,7 @@ public class HongbaodianProductController {
 		if ("SUCCESS".equals(return_code)) {
 			String err_code = responseMap.get("err_code");
 			reason = err_code;
-			if (reason.equals("NOTENOUGH")) {// 余额不足
+			if ("NOTENOUGH".equals(reason)) {// 余额不足
 				AccountingRecord record = memberHongbaodianCmdService.giveHongbaodianToMember(order.getPayerId(),
 						order.getProductPrice(), "return hongbaodian", System.currentTimeMillis());
 				MemberHongbaodianRecordDbo dbo = memberHongbaodianService.withdraw(record, order.getPayerId());
