@@ -2,6 +2,8 @@ package com.anbang.qipai.hongbao.plan.dao.mongodb;
 
 import java.util.List;
 
+import com.anbang.qipai.hongbao.web.vo.InvitationQuery;
+import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
@@ -55,7 +57,9 @@ public class MongodbMemberInvitationRecordDao implements MemberInvitationRecordD
 	public long countByMemberId(String memberId, String state) {
 		Query query = new Query();
 		query.addCriteria(Criteria.where("memberId").is(memberId));
-		query.addCriteria(Criteria.where("state").is(state));
+		if (StringUtils.isNotBlank(state)) {
+			query.addCriteria(Criteria.where("state").is(state));
+		}
 		return mongoTemplate.count(query, MemberInvitationRecord.class);
 	}
 
@@ -73,6 +77,45 @@ public class MongodbMemberInvitationRecordDao implements MemberInvitationRecordD
 		Query query = new Query();
 		query.addCriteria(Criteria.where("id").is(id));
 		return mongoTemplate.findOne(query, MemberInvitationRecord.class);
+	}
+
+	@Override
+	public long countByQuery(InvitationQuery invitationQuery) {
+		Query query = new Query();
+		if (StringUtils.isNotBlank(invitationQuery.getMemberId())) {
+			query.addCriteria(Criteria.where("memberId").is(invitationQuery.getMemberId()));
+		}
+		if (StringUtils.isNotBlank(invitationQuery.getState())) {
+			query.addCriteria(Criteria.where("state").is(invitationQuery.getState()));
+		}
+		return mongoTemplate.count(query, MemberInvitationRecord.class);
+	}
+
+	@Override
+	public List<MemberInvitationRecord> listByQuery(InvitationQuery invitationQuery) {
+		Query query = new Query();
+		if (StringUtils.isNotBlank(invitationQuery.getMemberId())) {
+			query.addCriteria(Criteria.where("memberId").is(invitationQuery.getMemberId()));
+		}
+		if (StringUtils.isNotBlank(invitationQuery.getState())) {
+			query.addCriteria(Criteria.where("state").is(invitationQuery.getState()));
+		}
+
+		if (invitationQuery.getPage() != null && invitationQuery.getSize() != null) {
+			query.with(invitationQuery.getSort());
+			query.skip((invitationQuery.getPage() - 1) * invitationQuery.getSize());
+			query.limit(invitationQuery.getSize());
+		}
+		return mongoTemplate.find(query, MemberInvitationRecord.class);
+	}
+
+	@Override
+	public void updateCause(String id, String cause) {
+		Query query = new Query();
+		query.addCriteria(Criteria.where("id").is(id));
+		Update update = new Update();
+		update.set("cause", cause);
+		mongoTemplate.updateFirst(query, update, MemberInvitationRecord.class);
 	}
 
 }

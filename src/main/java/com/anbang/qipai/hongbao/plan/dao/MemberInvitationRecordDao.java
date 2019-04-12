@@ -3,6 +3,7 @@ package com.anbang.qipai.hongbao.plan.dao;
 import java.util.List;
 
 import com.anbang.qipai.hongbao.plan.bean.MemberInvitationRecord;
+import com.anbang.qipai.hongbao.web.vo.InvitationQuery;
 
 public interface MemberInvitationRecordDao {
 
@@ -19,4 +20,10 @@ public interface MemberInvitationRecordDao {
 	List<MemberInvitationRecord> findByMemberId(int page, int size, String memberId, String state);
 
 	long countByMemberId(String memberId, String state);
+
+	long countByQuery(InvitationQuery invitationQuery);
+
+	List<MemberInvitationRecord> listByQuery(InvitationQuery invitationQuery);
+
+	void updateCause(String id, String cause);
 }

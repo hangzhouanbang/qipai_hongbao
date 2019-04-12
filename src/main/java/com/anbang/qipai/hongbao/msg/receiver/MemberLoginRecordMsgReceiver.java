@@ -5,6 +5,7 @@ import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+import javafx.util.Pair;
 import org.apache.http.HttpResponse;
 import org.apache.http.util.EntityUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -67,10 +68,21 @@ public class MemberLoginRecordMsgReceiver {
 	private void invitation(MemberLoginRecord record) {
 		MemberInvitationRecord invitation = memberInvitationRecordService
 				.findMemberInvitationRecordByInvitationMemberId(record.getMemberId());
-		if (invitation != null && !invitation.getState().equals(MemberInvitationRecordState.SUCCESS)
-				&& verifyReqIP(record.getLoginIp())) {
-			invitation = memberInvitationRecordService.updateMemberInvitationRecordState(invitation.getId(),
-					MemberInvitationRecordState.SUCCESS);
+		if (invitation != null && !invitation.getState().equals(MemberInvitationRecordState.SUCCESS)) {
+			Pair<Integer, String> pair = verifyReqIP(record.getLoginIp());
+			int flag = pair.getKey();
+			switch (flag) {
+				case 0:
+					invitation = memberInvitationRecordService.updateMemberInvitationRecordState(invitation.getId(),
+							MemberInvitationRecordState.SUCCESS);
+				case 1:
+					invitation = memberInvitationRecordService.updateMemberInvitationRecordCause(invitation.getId(),"账号异常");
+				case 2:
+					invitation = memberInvitationRecordService.updateMemberInvitationRecordCause(invitation.getId(),"非活动区域");
+			}
+
+			invitation.setLoginIp(record.getLoginIp());
+			invitation.setIpAddress(pair.getValue());
 			memberInvitationRecordMsgService.updateRecord(invitation);
 		}
 	}
@@ -78,10 +90,10 @@ public class MemberLoginRecordMsgReceiver {
 	/**
 	 * 验证ip
 	 */
-	private boolean verifyReqIP(String reqIP) {
+	private Pair<Integer,String> verifyReqIP(String reqIP) {
 		int num = memberLoginRecordService.countMemberNumByLoginIp(reqIP);
 		if (num > 2) {// 有2个以上的账号用该IP做登录
-			return false;
+			return new Pair<>(1,"");
 		}
 		String host = "http://iploc.market.alicloudapi.com";
 		String path = "/v3/ip";
@@ -105,11 +117,12 @@ public class MemberLoginRecordMsgReceiver {
 			String city = (String) map.get("city");
 			if (status.equals("1") && info.equals("OK") && province.equals("浙江省") && infocode.equals("10000")
 					&& city.equals("温州市") && adcode.equals("330300")) {
-				return true;
+				String ipAddress = province + city;
+				return new Pair<>(0,ipAddress);
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		return false;
+		return new Pair<>(2,"");
 	}
 }

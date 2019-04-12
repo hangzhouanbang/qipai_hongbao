@@ -1,11 +1,15 @@
 package com.anbang.qipai.hongbao.plan.bean;
 
+import org.springframework.data.mongodb.core.index.CompoundIndex;
+import org.springframework.data.mongodb.core.index.CompoundIndexes;
+
 /**
  * 玩家邀请记录
  * 
  * @author lsc
  *
  */
+@CompoundIndexes({ @CompoundIndex(name = "memberId", def = "{'memberId': 1}") })
 public class MemberInvitationRecord {
 	private String id;
 	private String memberId;// 邀请玩家id
@@ -14,6 +18,11 @@ public class MemberInvitationRecord {
 	private String invitationMemberNickname;// 被邀请玩家昵称
 	private String state;// 邀请状态
 	private long createTime;
+
+	private long activationTime;// 生效时间
+	private String cause;//导致当前状态的原因
+	private String loginIp;
+	private String ipAddress;
 
 	public String getId() {
 		return id;
@@ -71,4 +80,35 @@ public class MemberInvitationRecord {
 		this.state = state;
 	}
 
+	public long getActivationTime() {
+		return activationTime;
+	}
+
+	public void setActivationTime(long activationTime) {
+		this.activationTime = activationTime;
+	}
+
+	public String getCause() {
+		return cause;
+	}
+
+	public void setCause(String cause) {
+		this.cause = cause;
+	}
+
+	public String getLoginIp() {
+		return loginIp;
+	}
+
+	public void setLoginIp(String loginIp) {
+		this.loginIp = loginIp;
+	}
+
+	public String getIpAddress() {
+		return ipAddress;
+	}
+
+	public void setIpAddress(String ipAddress) {
+		this.ipAddress = ipAddress;
+	}
 }

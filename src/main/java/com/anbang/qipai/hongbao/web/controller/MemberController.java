@@ -153,6 +153,7 @@ public class MemberController {
 				record.setNickname(member.getNickname());
 				record.setInvitationMemberId(memberId);
 				record.setState(MemberInvitationRecordState.PROCESSING);
+				record.setCause("未登陆");
 				if (invitateMember != null) {
 					// 如果未收到新玩家消息则不填昵称
 					record.setInvitationMemberNickname(invitateMember.getNickname());
