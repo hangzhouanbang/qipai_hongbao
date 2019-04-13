@@ -125,10 +125,10 @@ public class MemberController {
 		if (memberAuthQueryService.findThirdAuthorizationDbo("union.weixin", unionid) != null) {
 			return "redirect:http://3cs.3cscy.com/majiang/u3D/html/red_packet.html";
 		}
-		if (memberAuthQueryService.findThirdAuthorizationDbo("open.weixin.app.qipai", unionid) != null) {
+		if (memberAuthQueryService.findThirdAuthorizationDbo("open.weixin.app.qipai", openid) != null) {
 			return "redirect:http://3cs.3cscy.com/majiang/u3D/html/red_packet.html";
 		}
-		if (memberAuthQueryService.findThirdAuthorizationDbo("open.weixin.gongzhonghao.qipai", unionid) != null) {
+		if (memberAuthQueryService.findThirdAuthorizationDbo("open.weixin.gongzhonghao.qipai", openid) != null) {
 			return "redirect:http://3cs.3cscy.com/majiang/u3D/html/red_packet.html";
 		}
 		// 用户注册
