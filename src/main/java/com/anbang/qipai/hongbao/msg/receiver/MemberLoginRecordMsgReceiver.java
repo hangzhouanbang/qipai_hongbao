@@ -5,7 +5,6 @@ import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import javafx.util.Pair;
 import org.apache.http.HttpResponse;
 import org.apache.http.util.EntityUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,6 +22,8 @@ import com.anbang.qipai.hongbao.plan.service.MemberInvitationRecordService;
 import com.anbang.qipai.hongbao.plan.service.MemberLoginRecordService;
 import com.anbang.qipai.hongbao.util.HttpUtil;
 import com.google.gson.Gson;
+
+import javafx.util.Pair;
 
 @EnableBinding(MemberLoginRecordSink.class)
 public class MemberLoginRecordMsgReceiver {
@@ -72,13 +73,15 @@ public class MemberLoginRecordMsgReceiver {
 			Pair<Integer, String> pair = verifyReqIP(record.getLoginIp());
 			int flag = pair.getKey();
 			switch (flag) {
-				case 0:
-					invitation = memberInvitationRecordService.updateMemberInvitationRecordState(invitation.getId(),
-							MemberInvitationRecordState.SUCCESS);
-				case 1:
-					invitation = memberInvitationRecordService.updateMemberInvitationRecordCause(invitation.getId(),"账号异常");
-				case 2:
-					invitation = memberInvitationRecordService.updateMemberInvitationRecordCause(invitation.getId(),"非活动区域");
+			case 0:
+				invitation = memberInvitationRecordService.updateMemberInvitationRecordState(invitation.getId(),
+						MemberInvitationRecordState.SUCCESS);
+			case 1:
+				invitation = memberInvitationRecordService.updateMemberInvitationRecordCause(invitation.getId(),
+						"账号异常");
+			case 2:
+				invitation = memberInvitationRecordService.updateMemberInvitationRecordCause(invitation.getId(),
+						"非活动区域");
 			}
 
 			invitation.setLoginIp(record.getLoginIp());
@@ -90,10 +93,10 @@ public class MemberLoginRecordMsgReceiver {
 	/**
 	 * 验证ip
 	 */
-	private Pair<Integer,String> verifyReqIP(String reqIP) {
+	private Pair<Integer, String> verifyReqIP(String reqIP) {
 		int num = memberLoginRecordService.countMemberNumByLoginIp(reqIP);
 		if (num > 2) {// 有2个以上的账号用该IP做登录
-			return new Pair<>(1,"");
+			return new Pair<>(1, "");
 		}
 		String host = "http://iploc.market.alicloudapi.com";
 		String path = "/v3/ip";
@@ -115,14 +118,13 @@ public class MemberLoginRecordMsgReceiver {
 			String province = (String) map.get("province");
 			String adcode = (String) map.get("adcode");
 			String city = (String) map.get("city");
-			if (status.equals("1") && info.equals("OK") && province.equals("浙江省") && infocode.equals("10000")
-					&& city.equals("温州市") && adcode.equals("330300")) {
+			if (status.equals("1") && info.equals("OK") && infocode.equals("10000")) {
 				String ipAddress = province + city;
-				return new Pair<>(0,ipAddress);
+				return new Pair<>(0, ipAddress);
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		return new Pair<>(2,"");
+		return new Pair<>(2, "");
 	}
 }
