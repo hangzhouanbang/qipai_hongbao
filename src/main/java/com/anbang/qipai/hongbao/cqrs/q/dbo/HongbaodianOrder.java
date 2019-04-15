@@ -22,6 +22,8 @@ public class HongbaodianOrder {
 	private RewardType rewardType;// 奖励类型
 	private double rewardNum;// 奖励数量
 	private String reqIP;// 下订单IP
+	private String province;// 省份
+	private String city;// 城市
 	private String spbill_create_ip;// 终端IP
 	private long createTime;// 创建时间
 	private long finishTime;// 完成时间
@@ -168,6 +170,22 @@ public class HongbaodianOrder {
 
 	public void setFinishTime(long finishTime) {
 		this.finishTime = finishTime;
+	}
+
+	public String getProvince() {
+		return province;
+	}
+
+	public void setProvince(String province) {
+		this.province = province;
+	}
+
+	public String getCity() {
+		return city;
+	}
+
+	public void setCity(String city) {
+		this.city = city;
 	}
 
 }

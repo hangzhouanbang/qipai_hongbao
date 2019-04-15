@@ -1,11 +1,15 @@
 package com.anbang.qipai.hongbao.cqrs.q.service;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
+import org.apache.http.HttpResponse;
+import org.apache.http.util.EntityUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.anbang.qipai.hongbao.conf.IPVerifyConfig;
 import com.anbang.qipai.hongbao.cqrs.q.dao.AuthorizationDboDao;
 import com.anbang.qipai.hongbao.cqrs.q.dao.HongbaodianOrderDao;
 import com.anbang.qipai.hongbao.cqrs.q.dao.HongbaodianProductDao;
@@ -17,7 +21,9 @@ import com.anbang.qipai.hongbao.cqrs.q.dbo.HongbaodianProduct;
 import com.anbang.qipai.hongbao.cqrs.q.dbo.MemberDbo;
 import com.anbang.qipai.hongbao.cqrs.q.dbo.PayInfo;
 import com.anbang.qipai.hongbao.cqrs.q.dbo.RewardType;
+import com.anbang.qipai.hongbao.util.HttpUtil;
 import com.anbang.qipai.hongbao.util.IPUtil;
+import com.google.gson.Gson;
 
 @Service
 public class HongbaodianOrderService {
@@ -73,6 +79,7 @@ public class HongbaodianOrderService {
 		order.setStatus("PROCESSING");
 		order.setCreateTime(System.currentTimeMillis());
 		order.setDesc(desc);
+		location(reqIP, order);
 		hongbaodianOrderDao.insert(order);
 
 		if (order.getRewardType().equals(RewardType.HONGBAORMB)) {
@@ -85,6 +92,41 @@ public class HongbaodianOrderService {
 			payInfoDao.insert(info);
 		}
 		return order;
+	}
+
+	/**
+	 * 获取物理地址
+	 */
+	private boolean location(String reqIP, HongbaodianOrder order) {
+		String host = "http://iploc.market.alicloudapi.com";
+		String path = "/v3/ip";
+		String method = "GET";
+		String appcode = IPVerifyConfig.APPCODE;
+		Map<String, String> headers = new HashMap<String, String>();
+		// // 最后在header中的格式(中间是英文空格)为Authorization:APPCODE
+		// 83359fd73fe94948385f570e3c139105
+		headers.put("Authorization", "APPCODE " + appcode);
+		Map<String, String> querys = new HashMap<String, String>();
+		querys.put("ip", reqIP);
+
+		try {
+			HttpResponse response = HttpUtil.doGet(host, path, method, headers, querys);
+			String entity = EntityUtils.toString(response.getEntity());
+			Gson gson = new Gson();
+			Map map = gson.fromJson(entity, Map.class);
+			String status = (String) map.get("status");
+			String info = (String) map.get("info");
+			String infocode = (String) map.get("infocode");
+			String province = (String) map.get("province");
+			String adcode = (String) map.get("adcode");
+			String city = (String) map.get("city");
+			order.setProvince(province);
+			order.setCity(city);
+			return true;
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return false;
 	}
 
 	public HongbaodianOrder finishOrder(HongbaodianOrder order, Map<String, String> responseMap,
