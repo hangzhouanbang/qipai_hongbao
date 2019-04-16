@@ -8,6 +8,8 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
+import javax.servlet.http.HttpServletRequest;
+
 import org.eclipse.jetty.client.HttpClient;
 import org.eclipse.jetty.client.api.ContentResponse;
 import org.eclipse.jetty.client.api.Request;
@@ -28,6 +30,7 @@ import com.anbang.qipai.hongbao.plan.bean.MemberInvitationRecord;
 import com.anbang.qipai.hongbao.plan.service.MemberInvitationRecordService;
 import com.anbang.qipai.hongbao.remote.service.QipaiMembersRemoteService;
 import com.anbang.qipai.hongbao.remote.vo.CommonRemoteVO;
+import com.anbang.qipai.hongbao.util.IPUtil;
 import com.anbang.qipai.hongbao.web.vo.CommonVO;
 import com.google.gson.Gson;
 import com.highto.framework.web.page.ListPage;
@@ -95,7 +98,7 @@ public class MemberController {
 	 * 邀请新玩家
 	 */
 	@RequestMapping(value = "/memberlogin")
-	public String member_login(String code, String state) {
+	public String member_login(HttpServletRequest request, String code, String state) {
 		if (StringUtil.isBlank(state)) {
 			return "redirect:http://3cs.3cscy.com/majiang/u3D/html/red_packet.html";
 		}
@@ -120,6 +123,7 @@ public class MemberController {
 		String nickname = (String) infomap.get("nickname");
 		String headimgurl = (String) infomap.get("headimgurl");
 		String unionid = (String) infomap.get("unionid");
+		String repIP = IPUtil.getRealIp(request);
 		int sex = Double.valueOf((double) infomap.get("sex")).intValue();
 		// 玩家是否已经注册
 		if (memberAuthQueryService.findThirdAuthorizationDbo("union.weixin", unionid) != null) {
@@ -133,7 +137,7 @@ public class MemberController {
 		}
 		// 用户注册
 		CommonRemoteVO rvo = qipaiMembersRemoteService.thirdauth_wechatidlogin_gongzhonghao(unionid, openid, nickname,
-				headimgurl, sex);
+				headimgurl, sex, repIP);
 		// 注册成功
 		if (rvo.isSuccess()) {
 			String json = gson.toJson(rvo.getData());

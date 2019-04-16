@@ -5,6 +5,15 @@ public class MemberDbo {
 	private String nickname;
 	private String headimgurl;
 	private String gender;// 会员性别:男:male,女:female
+	private String reqIP;// 注册ip
+
+	public String getReqIP() {
+		return reqIP;
+	}
+
+	public void setReqIP(String reqIP) {
+		this.reqIP = reqIP;
+	}
 
 	public String getId() {
 		return id;

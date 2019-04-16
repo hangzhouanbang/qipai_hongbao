@@ -7,12 +7,15 @@ import java.util.concurrent.Executors;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.util.EntityUtils;
+import org.eclipse.jetty.util.StringUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.stream.annotation.EnableBinding;
 import org.springframework.cloud.stream.annotation.StreamListener;
 
 import com.anbang.qipai.hongbao.conf.IPVerifyConfig;
 import com.anbang.qipai.hongbao.conf.MemberInvitationRecordState;
+import com.anbang.qipai.hongbao.cqrs.q.dbo.MemberDbo;
+import com.anbang.qipai.hongbao.cqrs.q.service.MemberAuthQueryService;
 import com.anbang.qipai.hongbao.msg.channel.sink.MemberLoginRecordSink;
 import com.anbang.qipai.hongbao.msg.msjobs.CommonMO;
 import com.anbang.qipai.hongbao.msg.service.MemberInvitationRecordMsgService;
@@ -27,6 +30,9 @@ import javafx.util.Pair;
 
 @EnableBinding(MemberLoginRecordSink.class)
 public class MemberLoginRecordMsgReceiver {
+
+	@Autowired
+	private MemberAuthQueryService memberAuthQueryService;
 
 	@Autowired
 	private MemberLoginRecordService memberLoginRecordService;
@@ -69,8 +75,10 @@ public class MemberLoginRecordMsgReceiver {
 	private void invitation(MemberLoginRecord record) {
 		MemberInvitationRecord invitation = memberInvitationRecordService
 				.findMemberInvitationRecordByInvitationMemberId(record.getMemberId());
-		if (invitation != null && !invitation.getState().equals(MemberInvitationRecordState.SUCCESS)) {
-			Pair<Integer, String> pair = verifyReqIP(record.getLoginIp());
+		MemberDbo invitateMember = memberAuthQueryService.findByMemberId(record.getMemberId());
+		if (invitateMember != null && !StringUtil.isBlank(invitateMember.getReqIP()) && invitation != null
+				&& !invitation.getState().equals(MemberInvitationRecordState.SUCCESS)) {
+			Pair<Integer, String> pair = verifyReqIP(invitateMember.getReqIP());
 			int flag = pair.getKey();
 			switch (flag) {
 			case 0:

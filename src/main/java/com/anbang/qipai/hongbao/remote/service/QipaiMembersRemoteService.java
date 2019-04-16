@@ -21,6 +21,7 @@ public interface QipaiMembersRemoteService {
 	@RequestMapping(value = "/thirdauth/wechatidlogin_gongzhonghao")
 	public CommonRemoteVO thirdauth_wechatidlogin_gongzhonghao(@RequestParam(value = "unionid") String unionid,
 			@RequestParam(value = "openid") String openid, @RequestParam(value = "nickname") String nickname,
-			@RequestParam(value = "headimgurl") String headimgurl, @RequestParam(value = "sex") Integer sex);
+			@RequestParam(value = "headimgurl") String headimgurl, @RequestParam(value = "sex") Integer sex,
+			@RequestParam(value = "repIP") String repIP);
 
 }
