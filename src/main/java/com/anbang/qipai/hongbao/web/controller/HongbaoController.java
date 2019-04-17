@@ -15,6 +15,7 @@ import com.anbang.qipai.hongbao.cqrs.c.domain.hongbaodianorder.OrderHasAlreadyEx
 import com.anbang.qipai.hongbao.cqrs.c.domain.hongbaodianorder.TimeLimitException;
 import com.anbang.qipai.hongbao.cqrs.c.service.HongbaodianOrderCmdService;
 import com.anbang.qipai.hongbao.cqrs.q.dbo.AuthorizationDbo;
+import com.anbang.qipai.hongbao.cqrs.q.dbo.MemberDbo;
 import com.anbang.qipai.hongbao.cqrs.q.dbo.RewardOrderDbo;
 import com.anbang.qipai.hongbao.cqrs.q.service.MemberAuthQueryService;
 import com.anbang.qipai.hongbao.cqrs.q.service.RewardOrderService;
@@ -58,7 +59,7 @@ public class HongbaoController {
 	 * 红包返现
 	 */
 	@RequestMapping("/give_hongbao_to_member")
-	public CommonVO giveHongbaoToMember(String memberId, double amount, String textSummary, String reqIP) {
+	public CommonVO giveHongbaoToMember(String memberId, double amount, String textSummary) {
 		CommonVO vo = new CommonVO();
 		AuthorizationDbo openAthDbo = memberAuthQueryService.findAuthorizationDboByMemberIdAndPublisher(memberId,
 				"open.weixin.app.qipai");
@@ -67,8 +68,9 @@ public class HongbaoController {
 			vo.setMsg("invalid openid");
 			return vo;
 		}
+		MemberDbo member = memberAuthQueryService.findByMemberId(memberId);
 		WhiteList whitelist = whiteListService.findByPlayerId(memberId);
-		if (whitelist == null && !verifyReqIP(reqIP)) {// ip不在白名单并且无效
+		if (whitelist == null && StringUtil.isBlank(member.getReqIP()) && !verifyReqIP(member.getReqIP())) {// ip不在白名单并且无效
 			vo.setSuccess(false);
 			vo.setMsg("invalid ip");
 			return vo;

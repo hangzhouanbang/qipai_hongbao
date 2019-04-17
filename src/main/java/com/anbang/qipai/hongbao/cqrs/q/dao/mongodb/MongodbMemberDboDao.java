@@ -40,13 +40,14 @@ public class MongodbMemberDboDao implements MemberDboDao {
 	}
 
 	@Override
-	public void updateMemberBaseInfo(String memberId, String nickname, String headimgurl, String gender) {
+	public void updateMemberBaseInfo(String memberId, String nickname, String headimgurl, String gender, String reqIP) {
 		Query query = new Query();
 		query.addCriteria(Criteria.where("id").is(memberId));
 		Update update = new Update();
 		update.set("nickname", nickname);
 		update.set("headimgurl", headimgurl);
 		update.set("gender", gender);
+		update.set("reqIP", reqIP);
 		mongoTemplate.updateFirst(query, update, MemberDbo.class);
 	}
 

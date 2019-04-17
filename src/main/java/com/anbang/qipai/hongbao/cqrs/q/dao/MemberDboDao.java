@@ -12,5 +12,5 @@ public interface MemberDboDao {
 
 	List<MemberDbo> findAllMembers();
 
-	void updateMemberBaseInfo(String memberId, String nickname, String headimgurl, String gender);
+	void updateMemberBaseInfo(String memberId, String nickname, String headimgurl, String gender, String reqIP);
 }
