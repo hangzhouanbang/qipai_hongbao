@@ -2,6 +2,7 @@ package com.anbang.qipai.hongbao.cqrs.q.dao.mongodb;
 
 import java.util.List;
 
+import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
@@ -47,7 +48,9 @@ public class MongodbMemberDboDao implements MemberDboDao {
 		update.set("nickname", nickname);
 		update.set("headimgurl", headimgurl);
 		update.set("gender", gender);
-		update.set("reqIP", reqIP);
+		if (!StringUtils.isBlank(reqIP)) {
+			update.set("reqIP", reqIP);
+		}
 		mongoTemplate.updateFirst(query, update, MemberDbo.class);
 	}
 
