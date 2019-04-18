@@ -69,6 +69,7 @@ public class MongodbMemberInvitationRecordDao implements MemberInvitationRecordD
 		query.addCriteria(Criteria.where("id").is(id));
 		Update update = new Update();
 		update.set("state", state);
+		update.set("activationTime",System.currentTimeMillis());
 		mongoTemplate.updateFirst(query, update, MemberInvitationRecord.class);
 	}
 
