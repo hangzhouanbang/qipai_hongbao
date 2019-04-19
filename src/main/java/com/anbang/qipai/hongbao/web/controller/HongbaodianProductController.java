@@ -21,6 +21,7 @@ import com.anbang.qipai.hongbao.cqrs.c.service.MemberHongbaodianCmdService;
 import com.anbang.qipai.hongbao.cqrs.q.dbo.AuthorizationDbo;
 import com.anbang.qipai.hongbao.cqrs.q.dbo.HongbaodianOrder;
 import com.anbang.qipai.hongbao.cqrs.q.dbo.HongbaodianProduct;
+import com.anbang.qipai.hongbao.cqrs.q.dbo.MemberDbo;
 import com.anbang.qipai.hongbao.cqrs.q.dbo.MemberHongbaodianAccountDbo;
 import com.anbang.qipai.hongbao.cqrs.q.dbo.MemberHongbaodianRecordDbo;
 import com.anbang.qipai.hongbao.cqrs.q.dbo.RewardType;
@@ -197,9 +198,10 @@ public class HongbaodianProductController {
 			vo.setMsg("invalid openid");
 			return vo;
 		}
+		MemberDbo member = memberAuthQueryService.findByMemberId(memberId);
 		String reqIP = IPUtil.getRealIp(request);
 		WhiteList whitelist = whiteListService.findByPlayerId(memberId);
-		if (whitelist == null && !verifyReqIP(request)) {// ip不在白名单并且无效
+		if (whitelist == null && !verifyReqIP(request, member.getReqIP())) {// ip不在白名单并且无效
 			vo.setSuccess(false);
 			vo.setMsg("invalid ip");
 			return vo;
@@ -312,11 +314,13 @@ public class HongbaodianProductController {
 	/**
 	 * 验证ip
 	 */
-	private boolean verifyReqIP(HttpServletRequest request) {
+	private boolean verifyReqIP(HttpServletRequest request, String reqIP) {
+		if (reqIP == null) {
+			return false;
+		}
 		if (!IPUtil.verifyIp(request)) {
 			return false;
 		}
-		String reqIP = IPUtil.getRealIp(request);
 		int num = memberLoginRecordService.countMemberNumByLoginIp(reqIP);
 		if (num > 2) {// 有2个以上的账号用该IP做登录
 			return false;

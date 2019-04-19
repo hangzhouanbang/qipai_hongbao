@@ -70,7 +70,7 @@ public class HongbaoController {
 		}
 		MemberDbo member = memberAuthQueryService.findByMemberId(memberId);
 		WhiteList whitelist = whiteListService.findByPlayerId(memberId);
-		if (whitelist == null && StringUtil.isBlank(member.getReqIP()) && !verifyReqIP(member.getReqIP())) {// ip不在白名单并且无效
+		if (whitelist == null && !verifyReqIP(member.getReqIP())) {// ip不在白名单并且无效
 			vo.setSuccess(false);
 			vo.setMsg("invalid ip");
 			return vo;
@@ -150,6 +150,9 @@ public class HongbaoController {
 	 * 验证ip
 	 */
 	private boolean verifyReqIP(String reqIP) {
+		if (reqIP == null) {
+			return false;
+		}
 		int num = memberLoginRecordService.countMemberNumByLoginIp(reqIP);
 		if (num > 4) {// 有4个以上的账号用该IP做登录
 			return false;
