@@ -284,6 +284,23 @@ public class HongbaodianProductController {
 						order.getProductPrice(), "return hongbaodian", System.currentTimeMillis());
 				MemberHongbaodianRecordDbo dbo = memberHongbaodianService.withdraw(record, order.getPayerId());
 				hongbaodianRecordMsgService.newRecord(dbo);
+				hongbaodianOrderCmdService.finishOrder(order.getId());
+				HongbaodianOrder finishOrder = hongbaodianOrderService.finishOrder(order, responseMap, queryMap,
+						status);
+				hongbaodianOrderMsgService.finishHongbaodianOrder(finishOrder);
+				return reason;
+			}
+		}
+		String return_code_query = queryMap.get("return_code");
+		String return_msg_query = queryMap.get("return_msg");
+		reason = return_msg_query;
+		if ("SUCCESS".equals(return_code_query)) {
+			String result_code = queryMap.get("result_code");
+			String err_code_des = queryMap.get("err_code_des");
+			reason = err_code_des;
+			if ("SUCCESS".equals(result_code)) {
+				status = queryMap.get("status");
+				reason = queryMap.get("reason");
 			}
 		}
 		hongbaodianOrderCmdService.finishOrder(order.getId());
