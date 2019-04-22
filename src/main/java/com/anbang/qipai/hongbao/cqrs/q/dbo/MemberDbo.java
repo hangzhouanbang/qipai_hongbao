@@ -5,7 +5,16 @@ public class MemberDbo {
 	private String nickname;
 	private String headimgurl;
 	private String gender;// 会员性别:男:male,女:female
+	private String phone;// 手机号
 	private String reqIP;// 注册ip
+
+	public String getPhone() {
+		return phone;
+	}
+
+	public void setPhone(String phone) {
+		this.phone = phone;
+	}
 
 	public String getReqIP() {
 		return reqIP;

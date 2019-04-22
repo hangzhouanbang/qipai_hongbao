@@ -33,7 +33,15 @@ public class MemberAuthQueryService {
 
 	public void updateMemberBaseInfo(MemberDbo member) {
 		memberDboDao.updateMemberBaseInfo(member.getId(), member.getNickname(), member.getHeadimgurl(),
-				member.getGender(), member.getReqIP());
+				member.getGender());
+	}
+
+	public void updateMemberPhone(MemberDbo member) {
+		memberDboDao.updateMemberPhone(member.getId(), member.getPhone());
+	}
+
+	public void updateMemberReqIP(MemberDbo member) {
+		memberDboDao.updateMemberReqIP(member.getId(), member.getReqIP());
 	}
 
 	public void insertMember(MemberDbo member) {

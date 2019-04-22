@@ -1,5 +1,6 @@
 package com.anbang.qipai.hongbao.msg.receiver;
 
+import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.stream.annotation.EnableBinding;
 import org.springframework.cloud.stream.annotation.StreamListener;
@@ -46,6 +47,14 @@ public class MemberMsgReceiver {
 		}
 		if ("update member info".equals(msg)) {
 			memberAuthQueryService.updateMemberBaseInfo(member);
+			if (!StringUtils.isBlank(member.getReqIP())) {
+				memberAuthQueryService.updateMemberReqIP(member);
+			}
+		}
+		if ("update member phone".equals(msg)) {
+			if (!StringUtils.isBlank(member.getPhone())) {
+				memberAuthQueryService.updateMemberPhone(member);
+			}
 		}
 	}
 }
