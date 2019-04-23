@@ -87,7 +87,7 @@ public class WhiteListController {
 		String[] ids = { blackListId };
 		WhiteList whiteList = new WhiteList();
 		whiteList.setPlayerId(blackList.getPlayerId());
-		whiteList.setRemark("黑名单转白名单");
+		whiteList.setRemark("blacklist to whitelist");
 		whiteList.setAddTime(System.currentTimeMillis());
 		whiteList.setOperator(operator);
 		whiteListService.insert(whiteList);

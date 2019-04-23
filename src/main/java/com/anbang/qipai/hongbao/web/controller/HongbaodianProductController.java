@@ -241,7 +241,7 @@ public class HongbaodianProductController {
 				return vo;
 			}
 			// 羊毛检测
-			boolean verify = verify(request, member.getReqIP(), memberId, member.getPhone());
+			boolean verify = verifyWool(request, member.getReqIP(), memberId, member.getPhone());
 			if (!verify) {
 				vo.setSuccess(false);
 				vo.setMsg("verify fail");
@@ -368,7 +368,7 @@ public class HongbaodianProductController {
 			BlackList blackList = new BlackList();
 			blackList.setPlayerId(memberId);
 			blackList.setAddTime(System.currentTimeMillis());
-			blackList.setRemark("有4个以上的账号用该IP做登录");
+			blackList.setRemark("ip used by above 4 member");
 			blackList.setReqIP(reqIP);
 			whiteListService.saveBlackList(blackList);
 			blackListMsgService.addBlackList(blackList);
@@ -380,7 +380,7 @@ public class HongbaodianProductController {
 	/**
 	 * 羊毛检测
 	 */
-	private boolean verify(HttpServletRequest request, String reqIP, String memberId, String phone) {
+	private boolean verifyWool(HttpServletRequest request, String reqIP, String memberId, String phone) {
 		String host = "https://api.253.com";
 		String path = "/open/wool/wcheck";
 		String method = "POST";
@@ -421,7 +421,7 @@ public class HongbaodianProductController {
 			BlackList blackList = new BlackList();
 			blackList.setPlayerId(memberId);
 			blackList.setAddTime(System.currentTimeMillis());
-			blackList.setRemark("羊毛检测不通过");
+			blackList.setRemark(" yangmao verify fail");
 			blackList.setReqIP(reqIP);
 			whiteListService.saveBlackList(blackList);
 			blackListMsgService.addBlackList(blackList);
