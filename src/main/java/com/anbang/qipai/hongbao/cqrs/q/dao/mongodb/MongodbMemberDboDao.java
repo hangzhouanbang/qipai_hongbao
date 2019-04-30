@@ -2,7 +2,6 @@ package com.anbang.qipai.hongbao.cqrs.q.dao.mongodb;
 
 import java.util.List;
 
-import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
@@ -41,16 +40,31 @@ public class MongodbMemberDboDao implements MemberDboDao {
 	}
 
 	@Override
-	public void updateMemberBaseInfo(String memberId, String nickname, String headimgurl, String gender, String reqIP) {
+	public void updateMemberBaseInfo(String memberId, String nickname, String headimgurl, String gender) {
 		Query query = new Query();
 		query.addCriteria(Criteria.where("id").is(memberId));
 		Update update = new Update();
 		update.set("nickname", nickname);
 		update.set("headimgurl", headimgurl);
 		update.set("gender", gender);
-		if (!StringUtils.isBlank(reqIP)) {
-			update.set("reqIP", reqIP);
-		}
+		mongoTemplate.updateFirst(query, update, MemberDbo.class);
+	}
+
+	@Override
+	public void updateMemberPhone(String memberId, String phone) {
+		Query query = new Query();
+		query.addCriteria(Criteria.where("id").is(memberId));
+		Update update = new Update();
+		update.set("phone", phone);
+		mongoTemplate.updateFirst(query, update, MemberDbo.class);
+	}
+
+	@Override
+	public void updateMemberReqIP(String memberId, String reqIP) {
+		Query query = new Query();
+		query.addCriteria(Criteria.where("id").is(memberId));
+		Update update = new Update();
+		update.set("reqIP", reqIP);
 		mongoTemplate.updateFirst(query, update, MemberDbo.class);
 	}
 

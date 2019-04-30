@@ -73,6 +73,16 @@ spring:
                   ms: 5
                 batch:
                   size: 16384
+          blackList:
+            producer:
+              configuration:
+                request:
+                  timeout:
+                    ms: 30000
+                linger:
+                  ms: 5
+                batch:
+                  size: 16384
                   
       bindings:
         memberHongbaodianRecord:
@@ -102,6 +112,11 @@ spring:
             partitionCount: 1
         whitelist:
           destination: whitelist
+          contentType: application/json
+          producer:
+            partitionCount: 1
+        blackList:
+          destination: blackList
           contentType: application/json
           producer:
             partitionCount: 1

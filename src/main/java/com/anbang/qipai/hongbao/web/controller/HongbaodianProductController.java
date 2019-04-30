@@ -5,6 +5,9 @@ import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 
+import org.apache.commons.lang.StringUtils;
+import org.apache.http.HttpResponse;
+import org.apache.http.util.EntityUtils;
 import org.eclipse.jetty.util.StringUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -12,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.anbang.qipai.hongbao.conf.IPVerifyConfig;
 import com.anbang.qipai.hongbao.cqrs.c.domain.hongbaodianorder.OrderHasAlreadyExistenceException;
 import com.anbang.qipai.hongbao.cqrs.c.domain.hongbaodianorder.TimeLimitException;
 import com.anbang.qipai.hongbao.cqrs.c.domain.member.MemberNotFoundException;
@@ -21,6 +25,7 @@ import com.anbang.qipai.hongbao.cqrs.c.service.MemberHongbaodianCmdService;
 import com.anbang.qipai.hongbao.cqrs.q.dbo.AuthorizationDbo;
 import com.anbang.qipai.hongbao.cqrs.q.dbo.HongbaodianOrder;
 import com.anbang.qipai.hongbao.cqrs.q.dbo.HongbaodianProduct;
+import com.anbang.qipai.hongbao.cqrs.q.dbo.MemberDbo;
 import com.anbang.qipai.hongbao.cqrs.q.dbo.MemberHongbaodianAccountDbo;
 import com.anbang.qipai.hongbao.cqrs.q.dbo.MemberHongbaodianRecordDbo;
 import com.anbang.qipai.hongbao.cqrs.q.dbo.RewardType;
@@ -28,15 +33,20 @@ import com.anbang.qipai.hongbao.cqrs.q.service.HongbaodianOrderService;
 import com.anbang.qipai.hongbao.cqrs.q.service.HongbaodianProductService;
 import com.anbang.qipai.hongbao.cqrs.q.service.MemberAuthQueryService;
 import com.anbang.qipai.hongbao.cqrs.q.service.MemberHongbaodianService;
+import com.anbang.qipai.hongbao.msg.service.BlackListMsgService;
 import com.anbang.qipai.hongbao.msg.service.HongbaodianOrderMsgService;
 import com.anbang.qipai.hongbao.msg.service.HongbaodianProductMsgService;
 import com.anbang.qipai.hongbao.msg.service.HongbaodianRecordMsgService;
+import com.anbang.qipai.hongbao.plan.bean.BlackList;
+import com.anbang.qipai.hongbao.plan.bean.IPVerifyDbo;
 import com.anbang.qipai.hongbao.plan.bean.MemberLoginLimitRecord;
 import com.anbang.qipai.hongbao.plan.bean.WhiteList;
+import com.anbang.qipai.hongbao.plan.service.IPVerifyService;
 import com.anbang.qipai.hongbao.plan.service.MemberLoginLimitRecordService;
 import com.anbang.qipai.hongbao.plan.service.MemberLoginRecordService;
 import com.anbang.qipai.hongbao.plan.service.WXPayService;
 import com.anbang.qipai.hongbao.plan.service.WhiteListService;
+import com.anbang.qipai.hongbao.util.HttpUtil;
 import com.anbang.qipai.hongbao.util.IPUtil;
 import com.anbang.qipai.hongbao.web.vo.CommonVO;
 import com.dml.accounting.AccountingRecord;
@@ -73,6 +83,9 @@ public class HongbaodianProductController {
 	private WhiteListService whiteListService;
 
 	@Autowired
+	private IPVerifyService iPVerifyService;
+
+	@Autowired
 	private MemberHongbaodianCmdService memberHongbaodianCmdService;
 
 	@Autowired
@@ -89,6 +102,9 @@ public class HongbaodianProductController {
 
 	@Autowired
 	private MemberLoginLimitRecordService memberLoginLimitRecordService;
+
+	@Autowired
+	private BlackListMsgService blackListMsgService;
 
 	private Gson gson = new Gson();
 
@@ -197,12 +213,40 @@ public class HongbaodianProductController {
 			vo.setMsg("invalid openid");
 			return vo;
 		}
-		String reqIP = IPUtil.getRealIp(request);
+		MemberDbo member = memberAuthQueryService.findByMemberId(memberId);
 		WhiteList whitelist = whiteListService.findByPlayerId(memberId);
-		if (whitelist == null && !verifyReqIP(request)) {// ip不在白名单并且无效
-			vo.setSuccess(false);
-			vo.setMsg("invalid ip");
-			return vo;
+		String reqIP = IPUtil.getRealIp(request);
+		if (whitelist == null) {// ip不在白名单
+			if (StringUtils.isBlank(member.getPhone())) {// 是否绑定手机
+				vo.setSuccess(false);
+				vo.setMsg("invalid phone");
+				return vo;
+			}
+			BlackList blackList = whiteListService.findBlackListByPlayerId(memberId);
+			if (blackList != null) {// 是否在黑名名单
+				vo.setSuccess(false);
+				vo.setMsg("in blacklist");
+				return vo;
+			}
+			if (!verifyReqIP(request, member.getReqIP(), memberId)) {// 同注册IP下是否有＞4个ID的账号
+				vo.setSuccess(false);
+				vo.setMsg("invalid ip");
+				return vo;
+			}
+			// 检测该账号是否进行过＞3次的【羊毛检测】（次数每日0点重置）
+			int verifyCount = iPVerifyService.countVerifyAmountTodayByMemberId(memberId);
+			if (verifyCount > 3) {
+				vo.setSuccess(false);
+				vo.setMsg("verify limit");
+				return vo;
+			}
+			// 羊毛检测
+			boolean verify = verifyWool(request, member.getReqIP(), memberId, member.getPhone());
+			if (!verify) {
+				vo.setSuccess(false);
+				vo.setMsg("verify fail");
+				return vo;
+			}
 		}
 		try {
 			// 创建订单
@@ -284,6 +328,23 @@ public class HongbaodianProductController {
 						order.getProductPrice(), "return hongbaodian", System.currentTimeMillis());
 				MemberHongbaodianRecordDbo dbo = memberHongbaodianService.withdraw(record, order.getPayerId());
 				hongbaodianRecordMsgService.newRecord(dbo);
+				hongbaodianOrderCmdService.finishOrder(order.getId());
+				HongbaodianOrder finishOrder = hongbaodianOrderService.finishOrder(order, responseMap, queryMap,
+						status);
+				hongbaodianOrderMsgService.finishHongbaodianOrder(finishOrder);
+				return reason;
+			}
+		}
+		String return_code_query = queryMap.get("return_code");
+		String return_msg_query = queryMap.get("return_msg");
+		reason = return_msg_query;
+		if ("SUCCESS".equals(return_code_query)) {
+			String result_code = queryMap.get("result_code");
+			String err_code_des = queryMap.get("err_code_des");
+			reason = err_code_des;
+			if ("SUCCESS".equals(result_code)) {
+				status = queryMap.get("status");
+				reason = queryMap.get("reason");
 			}
 		}
 		hongbaodianOrderCmdService.finishOrder(order.getId());
@@ -295,16 +356,78 @@ public class HongbaodianProductController {
 	/**
 	 * 验证ip
 	 */
-	private boolean verifyReqIP(HttpServletRequest request) {
+	private boolean verifyReqIP(HttpServletRequest request, String reqIP, String memberId) {
+		if (reqIP == null) {
+			return false;
+		}
 		if (!IPUtil.verifyIp(request)) {
 			return false;
 		}
-		String reqIP = IPUtil.getRealIp(request);
 		int num = memberLoginRecordService.countMemberNumByLoginIp(reqIP);
-		if (num > 2) {// 有2个以上的账号用该IP做登录
+		if (num > 4) {// 有4个以上的账号用该IP做登录
+			BlackList blackList = new BlackList();
+			blackList.setPlayerId(memberId);
+			blackList.setAddTime(System.currentTimeMillis());
+			blackList.setRemark("ip used by above 4 member");
+			blackList.setReqIP(reqIP);
+			whiteListService.saveBlackList(blackList);
+			blackListMsgService.addBlackList(blackList);
 			return false;
 		}
 		return true;
 	}
 
+	/**
+	 * 羊毛检测
+	 */
+	private boolean verifyWool(HttpServletRequest request, String reqIP, String memberId, String phone) {
+		String host = "https://api.253.com";
+		String path = "/open/wool/wcheck";
+		String method = "POST";
+		Map<String, String> headers = new HashMap<String, String>();
+		Map<String, String> querys = new HashMap<String, String>();
+		querys.put("appId", IPVerifyConfig.APPID);
+		querys.put("appKey", IPVerifyConfig.APPKEY);
+		querys.put("mobile", phone);
+		String ip = IPUtil.getRealIp(request);
+		if (!StringUtils.isBlank(ip)) {
+			querys.put("ip", ip);
+		}
+		querys.put("type", "0");
+
+		try {
+			HttpResponse response = HttpUtil.doPost(host, path, method, headers, querys, new HashMap<String, String>());
+			String entity = EntityUtils.toString(response.getEntity());
+			Map map = gson.fromJson(entity, Map.class);
+			String chargeStatus = (String) map.get("chargeStatus");
+			String code = (String) map.get("code");
+			String message = (String) map.get("message");
+			Map data = (Map) map.get("data");
+			IPVerifyDbo dbo = new IPVerifyDbo();
+			dbo.setMemberId(memberId);
+			dbo.setChargeStatus(chargeStatus);
+			dbo.setCode(code);
+			dbo.setMessage(message);
+			dbo.setData(data);
+			dbo.setCreateTime(System.currentTimeMillis());
+			iPVerifyService.saveIPVerifyDbo(dbo);
+			if (data != null) {
+				String mobile = (String) data.get("mobile");
+				String status = (String) data.get("status");
+				if ("200000".equals(code) && phone.equals(mobile) && "W1".equals(status)) {
+					return true;
+				}
+			}
+			BlackList blackList = new BlackList();
+			blackList.setPlayerId(memberId);
+			blackList.setAddTime(System.currentTimeMillis());
+			blackList.setRemark(" yangmao verify fail");
+			blackList.setReqIP(reqIP);
+			whiteListService.saveBlackList(blackList);
+			blackListMsgService.addBlackList(blackList);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return false;
+	}
 }

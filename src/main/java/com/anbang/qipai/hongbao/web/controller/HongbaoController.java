@@ -70,7 +70,7 @@ public class HongbaoController {
 		}
 		MemberDbo member = memberAuthQueryService.findByMemberId(memberId);
 		WhiteList whitelist = whiteListService.findByPlayerId(memberId);
-		if (whitelist == null && StringUtil.isBlank(member.getReqIP()) && !verifyReqIP(member.getReqIP())) {// ip不在白名单并且无效
+		if (whitelist == null && !verifyReqIP(member.getReqIP())) {// ip不在白名单并且无效
 			vo.setSuccess(false);
 			vo.setMsg("invalid ip");
 			return vo;
@@ -150,6 +150,9 @@ public class HongbaoController {
 	 * 验证ip
 	 */
 	private boolean verifyReqIP(String reqIP) {
+		if (reqIP == null) {
+			return false;
+		}
 		int num = memberLoginRecordService.countMemberNumByLoginIp(reqIP);
 		if (num > 4) {// 有4个以上的账号用该IP做登录
 			return false;
@@ -174,7 +177,8 @@ public class HongbaoController {
 			String province = (String) map.get("province");
 			String adcode = (String) map.get("adcode");
 			String city = (String) map.get("city");
-			if (status.equals("1") && info.equals("OK") && province.equals("浙江省") && infocode.equals("10000")) {
+			if (status.equals("1") && info.equals("OK") && infocode.equals("10000") && province.equals("浙江省")
+					&& adcode.equals("330000")) {
 				return true;
 			}
 		} catch (Exception e) {
@@ -182,5 +186,4 @@ public class HongbaoController {
 		}
 		return false;
 	}
-
 }
