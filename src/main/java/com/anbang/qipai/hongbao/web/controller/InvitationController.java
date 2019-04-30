@@ -104,7 +104,7 @@ public class InvitationController {
         URL += "&state=" + memberId;
         URL += "#wechat_redirect";
 
-        String host = "http://47.96.20.47:100/invitation/getImg?imgName=";
+        String host = "http://47.96.20.47:100/invitation/getImgs?imgName=";
         String filePath = "/data/tomcat/apache-tomcat-9.0.10/webapps/hongbao/member_invite/";
         String imgName =  memberId + ".jpg";
         String imgPath = filePath + imgName;
@@ -134,8 +134,8 @@ public class InvitationController {
         return "";
     }
 
-    @RequestMapping("/getImg")
-    public void getImg (String imgName, HttpServletResponse response) {
+    @RequestMapping("/getImgs")
+    public void getImgs (String imgName, HttpServletResponse response) {
         String filePath = "/data/tomcat/apache-tomcat-9.0.10/webapps/hongbao/member_invite/";
         String imgPath = filePath + imgName;
         File file = new File(imgPath);
