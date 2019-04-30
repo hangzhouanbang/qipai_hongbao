@@ -177,8 +177,7 @@ public class HongbaoController {
 			String province = (String) map.get("province");
 			String adcode = (String) map.get("adcode");
 			String city = (String) map.get("city");
-			if (status.equals("1") && info.equals("OK") && infocode.equals("10000") && province.equals("浙江省")
-					&& adcode.equals("330000")) {
+			if (status.equals("1") && info.equals("OK") && infocode.equals("10000") && province.equals("浙江省")) {
 				return true;
 			}
 		} catch (Exception e) {
