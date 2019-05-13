@@ -1,7 +1,7 @@
 spring:
   data:
     mongodb:
-      uri: mongodb://localhost:27017/qipai_hongbao
+      #uri: mongodb://localhost:27017/qipai_hongbao
 
   cloud:
     stream:
@@ -83,6 +83,36 @@ spring:
                   ms: 5
                 batch:
                   size: 16384
+          hongbaodianShopProductDbo:
+            producer:
+              configuration:
+                request:
+                  timeout:
+                    ms: 30000
+                linger:
+                  ms: 5
+                batch:
+                  size: 16384
+          hongbaodianProductRecord:
+            producer:
+              configuration:
+                request:
+                  timeout:
+                    ms: 30000
+                linger:
+                  ms: 5
+                batch:
+                  size: 16384
+          memberGoldsAccounting:
+            producer:
+              configuration:
+                request:
+                  timeout:
+                    ms: 30000
+                linger:
+                  ms: 5
+                batch:
+                  size: 16384
                   
       bindings:
         memberHongbaodianRecord:
@@ -117,6 +147,21 @@ spring:
             partitionCount: 1
         blackList:
           destination: blackList
+          contentType: application/json
+          producer:
+            partitionCount: 1
+        hongbaodianShopProductDbo:
+          destination: hongbaodianShopProductDbo
+          contentType: application/json
+          producer:
+            partitionCount: 1
+        hongbaodianProductRecord:
+          destination: hongbaodianProductRecord
+          contentType: application/json
+          producer:
+            partitionCount: 1
+        memberGoldsAccounting:
+          destination: memberGoldsAccounting
           contentType: application/json
           producer:
             partitionCount: 1
@@ -164,6 +209,20 @@ spring:
           contentType: application/json
         adminHongbaoAdjust:
           destination: adminHongbaoAdjust
+          group: qipai-hongbao
+          consumer:
+            concurrency: 1
+            partitioned: false
+          contentType: application/json
+        productType:
+          destination: productType
+          group: qipai-hongbao
+          consumer:
+            concurrency: 1
+            partitioned: false
+          contentType: application/json
+        receiverInfo:
+          destination: receiverInfo
           group: qipai-hongbao
           consumer:
             concurrency: 1

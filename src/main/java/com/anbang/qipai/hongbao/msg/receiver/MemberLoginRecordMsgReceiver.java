@@ -1,18 +1,14 @@
 package com.anbang.qipai.hongbao.msg.receiver;
 
-import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import org.apache.http.HttpResponse;
-import org.apache.http.util.EntityUtils;
 import org.eclipse.jetty.util.StringUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.stream.annotation.EnableBinding;
 import org.springframework.cloud.stream.annotation.StreamListener;
 
-import com.anbang.qipai.hongbao.conf.IPVerifyConfig;
 import com.anbang.qipai.hongbao.conf.MemberInvitationRecordState;
 import com.anbang.qipai.hongbao.cqrs.q.dbo.MemberDbo;
 import com.anbang.qipai.hongbao.cqrs.q.service.MemberAuthQueryService;
@@ -23,7 +19,6 @@ import com.anbang.qipai.hongbao.plan.bean.MemberInvitationRecord;
 import com.anbang.qipai.hongbao.plan.bean.MemberLoginRecord;
 import com.anbang.qipai.hongbao.plan.service.MemberInvitationRecordService;
 import com.anbang.qipai.hongbao.plan.service.MemberLoginRecordService;
-import com.anbang.qipai.hongbao.util.HttpUtil;
 import com.google.gson.Gson;
 
 import javafx.util.Pair;
@@ -78,7 +73,7 @@ public class MemberLoginRecordMsgReceiver {
 		MemberDbo invitateMember = memberAuthQueryService.findByMemberId(record.getMemberId());
 		if (invitateMember != null && !StringUtil.isBlank(invitateMember.getReqIP()) && invitation != null
 				&& !invitation.getState().equals(MemberInvitationRecordState.SUCCESS)) {
-			Pair<Integer, String> pair = verifyReqIP(invitateMember.getReqIP());
+			Pair<Integer, String> pair = verifyReqIP(invitateMember.getReqIP(), record.getIpAddress());
 			int flag = pair.getKey();
 			switch (flag) {
 			case 0:
@@ -101,37 +96,13 @@ public class MemberLoginRecordMsgReceiver {
 	/**
 	 * 验证ip
 	 */
-	private Pair<Integer, String> verifyReqIP(String reqIP) {
+	private Pair<Integer, String> verifyReqIP(String reqIP, String ipAddress) {
 		int num = memberLoginRecordService.countMemberNumByLoginIp(reqIP);
 		if (num > 2) {// 有2个以上的账号用该IP做登录
-			return new Pair<>(1, "");
+			return new Pair<>(1, "有2个以上的账号用该IP做登录");
 		}
-		String host = "http://iploc.market.alicloudapi.com";
-		String path = "/v3/ip";
-		String method = "GET";
-		String appcode = IPVerifyConfig.APPCODE;
-		Map<String, String> headers = new HashMap<String, String>();
-		// 最后在header中的格式(中间是英文空格)为Authorization:APPCODE 83359fd73fe94948385f570e3c139105
-		headers.put("Authorization", "APPCODE " + appcode);
-		Map<String, String> querys = new HashMap<String, String>();
-		querys.put("ip", reqIP);
-
-		try {
-			HttpResponse response = HttpUtil.doGet(host, path, method, headers, querys);
-			String entity = EntityUtils.toString(response.getEntity());
-			Map map = gson.fromJson(entity, Map.class);
-			String status = (String) map.get("status");
-			String info = (String) map.get("info");
-			String infocode = (String) map.get("infocode");
-			String province = (String) map.get("province");
-			String adcode = (String) map.get("adcode");
-			String city = (String) map.get("city");
-			if (status.equals("1") && info.equals("OK") && infocode.equals("10000") && province.equals("浙江省")) {
-				String ipAddress = province + city;
-				return new Pair<>(0, ipAddress);
-			}
-		} catch (Exception e) {
-			e.printStackTrace();
+		if (ipAddress.equals("浙江")) {
+			return new Pair<>(0, ipAddress);
 		}
 		return new Pair<>(2, "");
 	}

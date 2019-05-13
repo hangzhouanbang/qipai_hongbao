@@ -154,11 +154,11 @@ public class HongbaoController {
 			return false;
 		}
 		int num = memberLoginRecordService.countMemberNumByLoginIp(reqIP);
-		if (num > 4) {// 有4个以上的账号用该IP做登录
+		if (num > 2) {// 有2个以上的账号用该IP做登录
 			return false;
 		}
-		String host = "http://iploc.market.alicloudapi.com";
-		String path = "/v3/ip";
+		String host = "http://ipquery.market.alicloudapi.com";
+		String path = "/query";
 		String method = "GET";
 		String appcode = IPVerifyConfig.APPCODE;
 		Map<String, String> headers = new HashMap<String, String>();
@@ -171,14 +171,14 @@ public class HongbaoController {
 			HttpResponse response = HttpUtil.doGet(host, path, method, headers, querys);
 			String entity = EntityUtils.toString(response.getEntity());
 			Map map = gson.fromJson(entity, Map.class);
-			String status = (String) map.get("status");
-			String info = (String) map.get("info");
-			String infocode = (String) map.get("infocode");
-			String province = (String) map.get("province");
-			String adcode = (String) map.get("adcode");
-			String city = (String) map.get("city");
-			if (status.equals("1") && info.equals("OK") && infocode.equals("10000") && province.equals("浙江省")) {
-				return true;
+			String ret = ((Double) map.get("ret")).toString();
+			if (ret.equals("200")) {
+				Map data = (Map) map.get("data");
+				String prov = (String) data.get("prov");
+				String city = (String) data.get("city");
+				if (prov.contains("浙江")) {
+					return true;
+				}
 			}
 		} catch (Exception e) {
 			e.printStackTrace();

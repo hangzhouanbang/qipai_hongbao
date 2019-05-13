@@ -7,5 +7,5 @@ package com.anbang.qipai.hongbao.cqrs.q.dbo;
  *
  */
 public enum RewardType {
-	YUSHI, LIQUAN, VIPTIME, HONGBAODIAN, HONGBAORMB
+	YUSHI, LIQUAN, VIPTIME, HONGBAODIAN, HONGBAORMB, ENTITY
 }

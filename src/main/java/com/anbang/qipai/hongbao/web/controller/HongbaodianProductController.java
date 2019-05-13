@@ -399,7 +399,7 @@ public class HongbaodianProductController {
 			HttpResponse response = HttpUtil.doPost(host, path, method, headers, querys, new HashMap<String, String>());
 			String entity = EntityUtils.toString(response.getEntity());
 			Map map = gson.fromJson(entity, Map.class);
-			String chargeStatus = (String) map.get("chargeStatus");
+			String chargeStatus = ((Double) map.get("chargeStatus")).toString();
 			String code = (String) map.get("code");
 			String message = (String) map.get("message");
 			Map data = (Map) map.get("data");
@@ -430,4 +430,30 @@ public class HongbaodianProductController {
 		}
 		return false;
 	}
+
+	// public static void main(String[] args) throws Exception {
+	// String host = "https://api.253.com";
+	// String path = "/open/wool/wcheck";
+	// String method = "POST";
+	// Map<String, String> headers = new HashMap<String, String>();
+	// Map<String, String> querys = new HashMap<String, String>();
+	// querys.put("appId", IPVerifyConfig.APPID);
+	// querys.put("appKey", IPVerifyConfig.APPKEY);
+	// querys.put("mobile", "13588208292");
+	// // String ip = IPUtil.getRealIp(request);
+	// if (!StringUtils.isBlank("60.180.15.143")) {
+	// querys.put("ip", "60.180.15.143");
+	// }
+	// querys.put("type", "0");
+	// Gson gson = new Gson();
+	// HttpResponse response = HttpUtil.doPost(host, path, method, headers, querys,
+	// new HashMap<String, String>());
+	// String entity = EntityUtils.toString(response.getEntity());
+	// Map map = gson.fromJson(entity, Map.class);
+	// System.out.println(map);
+	// String chargeStatus = ((Double) map.get("chargeStatus")).toString();
+	// String code = (String) map.get("code");
+	// String message = (String) map.get("message");
+	// Map data = (Map) map.get("data");
+	// }
 }
