@@ -185,4 +185,22 @@ public class HongbaoController {
 		}
 		return false;
 	}
+
+	// public static void main(String[] args) throws Exception {
+	// String host = "http://iploc.market.alicloudapi.com";
+	// String path = "/v3/ip";
+	// String method = "GET";
+	// String appcode = "f00ea85a042c4404acaa87c121fc0079";
+	// Map<String, String> headers = new HashMap<String, String>();
+	// // 最后在header中的格式(中间是英文空格)为Authorization:APPCODE
+	// 83359fd73fe94948385f570e3c139105
+	// headers.put("Authorization", "APPCODE " + appcode);
+	// Map<String, String> querys = new HashMap<String, String>();
+	// querys.put("ip", "223.104.247.133");
+	// Gson gson = new Gson();
+	// HttpResponse response = HttpUtil.doGet(host, path, method, headers, querys);
+	// String entity = EntityUtils.toString(response.getEntity());
+	// Map map = gson.fromJson(entity, Map.class);
+	// System.out.println(map);
+	// }
 }
